@@ -24,34 +24,34 @@
         </div>
         <div class="table-content">
           <table>
-            <tr>
-              <th>Serial</th>
-              <th>Type</th>
-              <th>Description</th>
-              <th>Location</th>
-            </tr>
-            <tr>
-              <td><span class="asset-serial"></span></td>
-              <td>Camera</td>
-              <td>Surveillance Camera</td>
-              <td>Building A</td>
-            </tr>
-            <tr>
-              <td><span class="asset-serial"></span></td>
-              <td>Sensor</td>
-              <td>Temperature Sensor</td>
-              <td>Building B</td>
-            </tr>
-            <tr>
-              <td><span class="asset-serial"></span></td>
-              <td>Router</td>
-              <td>WiFi Router</td>
-              <td>Building C</td>
-            </tr>
+            <thead>
+              <tr>
+                <th class="sortable" data-column="0">
+                  Serial <span class="sort-icon"></span>
+                </th>
+                <th class="sortable" data-column="1">
+                  Type <span class="sort-icon"></span>
+                </th>
+                <th class="sortable" data-column="2">
+                  Description <span class="sort-icon"></span>
+                </th>
+                <th class="sortable" data-column="3">
+                  Location <span class="sort-icon"></span>
+                </th>
+                <th class="sortable" data-column="4">
+                  Status <span class="sort-icon"></span>
+                </th>
+                <th class="sortable" data-column="5">
+                  Last Seen <span class="sort-icon"></span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="generated-rows"></tbody>
           </table>
         </div>
       </div>
     </div>
-    <script src="main.js" defer></script>
+
+    <script src="main.js" type="module"></script>
   </body>
 </html>
