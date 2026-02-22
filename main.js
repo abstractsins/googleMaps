@@ -21,7 +21,7 @@ const assetTableBuilder = (nAssets) => {
       <td class="asset-serial">${serial}</td>
       <td>${type}</td>
       <td>${description}</td>
-      <td>${loc}</td>
+      <td><a href="#" class="map-link"><i class="fa-solid fa-map-location-dot"></i> ${loc}</a></td>
       <td>${status}</td>
       <td>${lastSeen}</td>
     </tr>`;

@@ -5,6 +5,33 @@ body {
   align-items: center;
 }
 
+gmp-map {
+  display: block;
+  height: 400px;
+  margin: 0 0 2vh 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: clamp(600px, 90vw, 1300px);
+}
+
+.map-container .map-header {
+  display: flex;
+  width: 100%
+}
+
+a.map-link {
+  color: #1a73e8;
+  text-decoration: none;
+  font-weight: 500;
+}
+
 h1 {
   display: inline-block;
   font-family: sans-serif;
