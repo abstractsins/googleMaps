@@ -183,6 +183,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const tableRows = document.getElementById("generated-rows");
   tableRows.innerHTML = assetTableBuilder(numOfAssetsToCreate);
 
+  defaultMapSetup();
+
   // Add click handlers to sortable headers
   const sortableHeaders = document.querySelectorAll("th.sortable");
   sortableHeaders.forEach((header) => {
@@ -195,3 +197,35 @@ window.addEventListener("DOMContentLoaded", () => {
   // Sort by Serial (column 0) in ascending order on initial load
   sortTable(0);
 });
+
+
+
+async function defaultMapSetup() {
+  const mapElement = document.querySelector("gmp-map");
+  if (mapElement) {
+    mapElement.setAttribute("center", await getUserLocation());
+  }
+}
+
+async function getUserLocation() {
+  if (navigator.geolocation) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("User location obtained:", position.coords);
+          const { latitude, longitude } = position.coords;
+          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          resolve(`${latitude},${longitude}`);
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+          resolve("39.8283,-98.5795"); // Geographic center of the contiguous US
+        }
+      );
+    });
+  } else {
+    console.error("Geolocation is not supported by this browser.");
+    return "39.8283,-98.5795"; // Geographic center of the contiguous US
+  }
+
+}
