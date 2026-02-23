@@ -50,17 +50,80 @@ export const assetTypes = [
   { type: "Dashboard", description: "Instrument panel assembly" },
 ];
 
-export const locations = [
-  "Main Entrance",
-  "Lobby",
-  "Parking Lot",
-  "Warehouse",
-  "Office 101",
-  "Conference Room",
-  "Backyard",
-  "Rooftop",
-  "Hallway A",
-  "Loading Dock",
+export const globalLocations = [
+  { city: "Berlin", country: "Germany", coords: [52.52, 13.405] },
+  { city: "Los Angeles", country: "USA", coords: [34.0522, -118.2437] },
+  { city: "Chicago", country: "USA", coords: [41.8781, -87.6298] },
+  { city: "Houston", country: "USA", coords: [29.7604, -95.3698] },
+  { city: "Philadelphia", country: "USA", coords: [39.9526, -75.1652] },
+  { city: "Montreal", country: "Canada", coords: [45.5017, -73.5673] },
+  { city: "Singapore", country: "Singapore", coords: [1.3521, 103.8198] },
+];
+
+export const cityLocations = [
+  {
+    address: "Alexanderplatz 1",
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Mitte",
+    coords: [52.5219, 13.4132],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Kreuzberg",
+    address: "Oranienstraße 1",
+    coords: [52.502, 13.419],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Prenzlauer Berg",
+    address: "Kollwitzstraße 1",
+    coords: [52.538, 13.424],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Friedrichshain",
+    address: "Boxhagener Platz 1",
+    coords: [52.515, 13.454],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Charlottenburg",
+    address: "Kurfürstendamm 1",
+    coords: [52.502, 13.333],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Neukölln",
+    address: "Karl-Marx-Straße 1",
+    coords: [52.487, 13.439],
+  },
+  {
+    city: "Berlin",
+    country: "Germany",
+    neighborhood: "Spandau",
+    address: "Altstädter Ring 1",
+    coords: [52.537, 13.199],
+  },
+];
+
+export const localLocations = [
+  { name: "Warehouse A", coords: [0, 0] },
+  { name: "Warehouse B", coords: [0, 0] },
+  { name: "Warehouse C", coords: [0, 0] },
+  { name: "Warehouse D", coords: [0, 0] },
+  { name: "Administration A", coords: [0, 0] },
+  { name: "Administration B", coords: [0, 0] },
+  { name: "Administration C", coords: [0, 0] },
+  { name: "Repair Shop A", coords: [0, 0] },
+  { name: "Repair Shop B", coords: [0, 0] },
+  { name: "Maintenance Area A", coords: [0, 0] },
+  { name: "Maintenance Area B", coords: [0, 0] },
 ];
 
 export const statuses = [

@@ -23,16 +23,9 @@
       </subtitle>
     </div>
 
-    <!-- GOOGLE MAPS COMPONENT -->
-    <div class="map-container">
-      <div class="map-header">
-        <h2>Your current location:</h2>
-      </div>
-      <gmp-map
-        zoom="20"
-        map-id="DEMO_MAP_ID"
-      ></gmp-map>
-    </div>
+    <nav class="page-nav">
+      <ul id="cities-list"></ul>
+    </nav>
 
     <!-- PAGE CONTENT -->
     <div class="page-content">
@@ -44,22 +37,22 @@
           <table>
             <thead>
               <tr>
-                <th class="sortable" data-column="0">
+                <th class="sortable" data-column="0" tabindex="0">
                   Serial <span class="sort-icon"></span>
                 </th>
-                <th class="sortable" data-column="1">
+                <th class="sortable" data-column="1" tabindex="0">
                   Type <span class="sort-icon"></span>
                 </th>
-                <th class="sortable" data-column="2">
+                <th class="sortable" data-column="2" tabindex="0">
                   Description <span class="sort-icon"></span>
                 </th>
-                <th class="sortable" data-column="3">
+                <th class="sortable" data-column="3" tabindex="0">
                   Location <span class="sort-icon"></span>
                 </th>
-                <th class="sortable" data-column="4">
+                <th class="sortable" data-column="4" tabindex="0">
                   Status <span class="sort-icon"></span>
                 </th>
-                <th class="sortable" data-column="5">
+                <th class="sortable" data-column="5" tabindex="0">
                   Last Seen <span class="sort-icon"></span>
                 </th>
               </tr>
@@ -70,9 +63,11 @@
       </div>
     </div>
 
+    <!-- SCRIPTS -->
     <script src="main.js" type="module"></script>
+    <script src="mapUtils.js" type="module"></script>
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=__MAPS_API_KEY__&libraries=maps&v=beta"
+      src="https://maps.googleapis.com/maps/api/js?key=__MAPS_API_KEY__&libraries=maps&v=beta&loading=async"
       async
       defer
     ></script>

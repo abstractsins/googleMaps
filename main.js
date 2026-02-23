@@ -4,6 +4,7 @@ import {
   randomLocation,
   randomStatus,
   randomLastSeen,
+  populateteCityList,
 } from "./assetHelpers.js";
 import { numOfAssetsToCreate } from "./constants.js";
 
@@ -19,11 +20,11 @@ const assetTableBuilder = (nAssets) => {
 
     text += `<tr>
       <td class="asset-serial">${serial}</td>
-      <td>${type}</td>
-      <td>${description}</td>
-      <td><a href="#" class="map-link"><i class="fa-solid fa-map-location-dot"></i> ${loc}</a></td>
-      <td>${status}</td>
-      <td>${lastSeen}</td>
+      <td class="asset-type">${type}</td>
+      <td class="asset-description">${description}</td>
+      <td class="location-cell"><span tabindex="0" role="button" aria-label="Location" lat="${loc.coords[0]}" lng="${loc.coords[1]}" onkeydown="if(event.key==='Enter'){processLocationClick(event)}" onclick="processLocationClick(event)" class="map-link"><i class="fa-solid fa-map-location-dot"></i> ${loc.short}</span></td>
+      <td class="asset-status">${status}</td>
+      <td class="asset-last-seen">${lastSeen}</td>
     </tr>`;
   }
   return text;
@@ -192,13 +193,22 @@ window.addEventListener("DOMContentLoaded", () => {
       const columnIndex = parseInt(header.getAttribute("data-column"));
       sortTable(columnIndex);
     });
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const columnIndex = parseInt(header.getAttribute("data-column"));
+        sortTable(columnIndex);
+      }
+    });
   });
+
+  // Populate city list in nav
+  const citiesList = document.getElementById("cities-list");
+  populateteCityList(citiesList);
 
   // Sort by Serial (column 0) in ascending order on initial load
   sortTable(0);
 });
-
-
 
 async function defaultMapSetup() {
   const mapElement = document.querySelector("gmp-map");
@@ -220,12 +230,11 @@ async function getUserLocation() {
         (error) => {
           console.error("Error getting user location:", error);
           resolve("39.8283,-98.5795"); // Geographic center of the contiguous US
-        }
+        },
       );
     });
   } else {
     console.error("Geolocation is not supported by this browser.");
     return "39.8283,-98.5795"; // Geographic center of the contiguous US
   }
-
 }
