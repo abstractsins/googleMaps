@@ -202,6 +202,92 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  const mainTableHeaders = document.querySelectorAll(".table-header");
+  const navItems = document.querySelectorAll("#top-level li");
+
+  const updateChevronIcon = (header, isActive) => {
+    const icon = header.querySelector("i.fa-solid");
+    if (!icon) return;
+    icon.classList.toggle("fa-chevron-down", !isActive);
+    icon.classList.toggle("fa-chevron-up", isActive);
+  };
+
+  const setActiveSection = (index, { scroll = true } = {}) => {
+    const targetHeader = mainTableHeaders[index];
+    if (!targetHeader) return;
+
+    // Ensure only the matching table header is active
+    mainTableHeaders.forEach((header, i) => {
+      if (i === index) {
+        header.classList.add("active");
+        updateChevronIcon(header, true);
+      } else {
+        header.classList.remove("active");
+        updateChevronIcon(header, false);
+      }
+    });
+
+    // Reflect active state on the nav itself
+    navItems.forEach((item, i) => {
+      if (i === index) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+
+    if (scroll) {
+      targetHeader.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Add click handlers to main table headers and sync nav state
+  mainTableHeaders.forEach((header, index) => {
+    const handleToggle = () => {
+      const isActive = header.classList.contains("active");
+      if (isActive) {
+        header.classList.remove("active");
+        updateChevronIcon(header, false);
+        if (navItems[index]) {
+          navItems[index].classList.remove("active");
+        }
+      } else {
+        setActiveSection(index, { scroll: false });
+      }
+    };
+
+    header.addEventListener("click", handleToggle);
+    header.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleToggle();
+      }
+    });
+  });
+
+  // Add click handlers to top-level nav items to control matching table headers
+  navItems.forEach((navItem, index) => {
+    const activateSection = () => {
+      setActiveSection(index, { scroll: true });
+    };
+
+    navItem.addEventListener("click", activateSection);
+    navItem.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        activateSection();
+      }
+    });
+  });
+
+  // If a nav item is pre-marked active in the HTML, sync its header
+  const initiallyActiveIndex = Array.from(navItems).findIndex((item) =>
+    item.classList.contains("active"),
+  );
+  if (initiallyActiveIndex >= 0) {
+    setActiveSection(initiallyActiveIndex, { scroll: false });
+  }
+
   // Populate city list in nav
   const citiesList = document.getElementById("cities-list");
   populateteCityList(citiesList);
