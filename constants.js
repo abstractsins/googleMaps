@@ -7,3 +7,6 @@ export const serialNumberSuffixRange = [10, 99]; // 2 digit number
 
 //* Percentage chance of "Never" last seen */
 export const chanceOfNever = 0.2;
+
+//* Asset counts across the world (randomly generated for each location) */
+export const globalLocAssetCountsMinMax = [100, 3000];

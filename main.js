@@ -4,8 +4,9 @@ import {
   randomLocation,
   randomStatus,
   randomLastSeen,
-  populateteCityList,
+  populateCityList,
 } from "./assetHelpers.js";
+import { globalAssetCounts } from "./assetData.js";
 import { numOfAssetsToCreate } from "./constants.js";
 
 //* -------------------- TABLE BUILDER -------------------- */
@@ -227,8 +228,17 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Reflect active state on the nav itself
+    // Reflect active state on the navs (main and side)
     navItems.forEach((item, i) => {
+      if (i === index) {
+        item.classList.add("active");
+      } else {
+        item.classList.remove("active");
+      }
+    });
+
+    const sideNavItems = document.querySelectorAll("#side-nav-list li");
+    sideNavItems.forEach((item, i) => {
       if (i === index) {
         item.classList.add("active");
       } else {
@@ -254,6 +264,7 @@ window.addEventListener("DOMContentLoaded", () => {
       } else {
         setActiveSection(index, { scroll: false });
       }
+      window.closeExistingMap();
     };
 
     header.addEventListener("click", handleToggle);
@@ -284,18 +295,51 @@ window.addEventListener("DOMContentLoaded", () => {
   const initiallyActiveIndex = Array.from(navItems).findIndex((item) =>
     item.classList.contains("active"),
   );
+
   if (initiallyActiveIndex >= 0) {
     setActiveSection(initiallyActiveIndex, { scroll: false });
   }
 
   // Populate city list in nav
   const citiesList = document.getElementById("cities-list");
-  populateteCityList(citiesList);
+  populateCityList(citiesList);
 
   // Sort by Serial (column 0) in ascending order on initial load
   sortTable(0);
+
+  defaultToGlobalView();
+  navMenuTrackingInit();
+
+  // Add handlers to side nav items to mimic main nav behavior
+  const sideNavList = document.getElementById("side-nav-list");
+  if (sideNavList) {
+    const handleSideNavActivate = (event) => {
+      const clickedItem = event.target.closest("li");
+      if (!clickedItem) return;
+      const { sectionIndex } = clickedItem.dataset;
+
+      if (sectionIndex !== undefined) {
+        const index = parseInt(sectionIndex, 10);
+        if (!Number.isNaN(index)) {
+          setActiveSection(index, { scroll: true });
+        }
+      } else {
+        // Default behavior for static items like "Return to Top"
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    };
+
+    sideNavList.addEventListener("click", handleSideNavActivate);
+    sideNavList.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleSideNavActivate(e);
+      }
+    });
+  }
 });
 
+//* -------------------- Initialization -------------------- */
 async function defaultMapSetup() {
   const mapElement = document.querySelector("gmp-map");
   if (mapElement) {
@@ -323,4 +367,86 @@ async function getUserLocation() {
     console.error("Geolocation is not supported by this browser.");
     return "39.8283,-98.5795"; // Geographic center of the contiguous US
   }
+}
+
+async function setGlobalMap() {
+  if (window.showWorldMap) {
+    await window.showWorldMap();
+  }
+  globalAssetCounts.forEach(({ coords, count }) => {
+    if (window.placeDefaultMarker) {
+      window.placeDefaultMarker(coords[0], coords[1], count);
+    } else if (window.placeMarker) {
+      window.placeMarker(coords[0], coords[1]);
+    }
+  });
+}
+
+function defaultToGlobalView() {
+  const globalViewHeader = document.querySelector(
+    "div#global-view-table > div.table-header",
+  );
+  if (globalViewHeader && !globalViewHeader.classList.contains("active")) {
+    globalViewHeader.click();
+    if (window.placeMap) {
+      window.placeMap(globalViewHeader);
+    }
+    setGlobalMap();
+  }
+}
+
+function navMenuTrackingInit() {
+  const navList = document.querySelector("ul#top-level");
+  if (!navList) return;
+
+  const updateNavPosition = () => {
+    const rect = navList.getBoundingClientRect();
+
+    const viewportY = rect.top;
+
+    if (viewportY <= 0) {
+      console.log("showing side nav");
+      setSideNavVisible(true);
+    } else {
+      console.log("hiding side nav");
+      setSideNavVisible(false);
+    }
+  };
+
+  const setSideNavVisible = (visible) => {
+    const sideNav = document.querySelector("nav.side-nav");
+    if (!sideNav) return;
+    sideNav.classList.toggle("visible", visible);
+  };
+
+  const populateSideNav = () => {
+    const sideNavList = document.getElementById("side-nav-list");
+    const mainNavItems = document.querySelectorAll("#top-level li");
+    if (!sideNavList || !mainNavItems) return;
+    mainNavItems.forEach((item, index) => {
+      const clone = item.cloneNode(true);
+      clone.dataset.sectionIndex = index;
+      sideNavList.appendChild(clone);
+    });
+  };
+
+  const closeSideNavButton = document.getElementById("close-side-nav");
+  if (closeSideNavButton) {
+    closeSideNavButton.addEventListener("click", () => {
+      setSideNavVisible(false);
+    });
+    closeSideNavButton.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        setSideNavVisible(false);
+      }
+    });
+  }
+
+  populateSideNav();
+  updateNavPosition();
+
+  // Track as the user scrolls / resizes
+  window.addEventListener("scroll", updateNavPosition);
+  window.addEventListener("resize", updateNavPosition);
 }

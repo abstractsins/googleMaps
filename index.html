@@ -25,11 +25,22 @@
 
     <!-- NAV -->
     <nav class="page-nav">
-      <!-- <ul id="cities-list"></ul> -->
       <ul id="top-level">
         <li tabindex="0" role="navigation">Global View</li>
         <li tabindex="0" role="navigation">By Facility</li>
         <li tabindex="0" role="navigation">All Assets</li>
+      </ul>
+    </nav>
+
+    <!-- SIDE NAV -->
+    <nav class="side-nav">
+      <span id="close-side-nav" role="button" class="nav-control" tabindex="0">
+        <i class="fa-solid fa-angles-left"></i>
+      </span>
+      <ul id="side-nav-list">
+        <li tabindex="0" role="navigation">
+          <a tabindex="-1" href="#">Return to Top</a>
+        </li>
       </ul>
     </nav>
 
@@ -41,6 +52,7 @@
           <h2>Global View</h2>
           <i class="fa-solid fa-chevron-down"></i>
         </div>
+        <div class="table-content"></div>
       </div>
 
       <!-- BY FACILITY -->
@@ -48,6 +60,11 @@
         <div class="table-header" tabindex="0" role="button">
           <h2>By Facility</h2>
           <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div class="table-content">
+          <nav>
+            <ul id="cities-list"></ul>
+          </nav>
         </div>
       </div>
 
@@ -57,7 +74,7 @@
           <h2>All Assets</h2>
           <i class="fa-solid fa-chevron-down"></i>
         </div>
-        <div class="table-content" tabindex="0" role="button">
+        <div class="table-content">
           <table>
             <thead>
               <tr>

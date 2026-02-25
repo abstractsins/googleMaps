@@ -33,13 +33,12 @@ gmp-map {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-nav ul#top-level {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+gmp-map.global {
+  height: 550px;
 }
 
 nav ul#top-level,
+nav ul#side-nav-list,
 nav ul#cities-list {
   text-transform: uppercase;
   font-family: sans-serif;
@@ -58,12 +57,70 @@ nav li {
 nav li:hover {
   text-decoration: underline;
   cursor: pointer;
-  background-color: var(--color-nav-hover);
+  /* background-color: var(--color-nav-hover); */
 }
 
 nav li.active {
-  text-decoration: underline;
   background-color: var(--color-nav-hover);
+}
+
+nav.side-nav {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: fixed;
+  top: 30%;
+  left: -20%;
+  transform: translateY(-50%);
+  background-color: white;
+  padding: 1vh 0;
+  border-radius: 0 5px 5px 0;
+  box-shadow: var(--box-shadow-default);
+  transition:
+    transform 0.3s ease,
+    left 0.3s ease;
+}
+
+span.nav-control {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 5px;
+  margin: 0 1vw;
+}
+
+span.nav-control:hover {
+  background-color: var(--color-nav-hover);
+  outline: 3px solid var(--color-link);
+  outline-offset: 2px;
+  cursor: pointer;
+  box-shadow: var(--box-shadow-default);
+}
+
+span.nav-control:active {
+  outline: 3px solid goldenrod;
+  box-shadow: none;
+}
+
+ul#side-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1vw;
+}
+
+nav.side-nav.visible {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 5px;
+  left: 2%;
+}
+
+nav.side-nav a {
+  color: unset;
+  text-decoration: none;
+  font-family: sans-serif;
 }
 
 .map-wrapper {

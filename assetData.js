@@ -1,3 +1,5 @@
+import { globalLocAssetCountsMinMax } from "./constants.js";
+
 export const assetTypes = [
   { type: "Camera", description: "Outdoor security camera" },
   { type: "Camera", description: "Indoor security camera" },
@@ -58,6 +60,8 @@ export const globalLocations = [
   { city: "Philadelphia", country: "USA", coords: [39.9526, -75.1652] },
   { city: "Montreal", country: "Canada", coords: [45.5017, -73.5673] },
   { city: "Singapore", country: "Singapore", coords: [1.3521, 103.8198] },
+  { city: "Sydney", country: "Australia", coords: [-33.8688, 151.2093] },
+  { city: "Tokyo", country: "Japan", coords: [35.6762, 139.6503] },
 ];
 
 export const cityLocations = [
@@ -136,3 +140,13 @@ export const statuses = [
   "New",
   "Retired",
 ];
+
+// For each global location, come up with a number of total assets that would be "seen" there, ranging from 150 to 3000
+export const globalAssetCounts = globalLocations.map((loc) => {
+  const randomAssetCount = () => {
+    const [min, max] = globalLocAssetCountsMinMax;
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+  const count = randomAssetCount();
+  return { location: loc.city, coords: loc.coords, count };
+});

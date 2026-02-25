@@ -73,11 +73,10 @@ export const randomLastSeen = () => {
   return `${dateStr} ${timeStr}`;
 };
 
-export const populateteCityList = (container) => {
+export const populateCityList = (container) => {
   globalLocations.forEach((loc) => {
     const li = document.createElement("li");
     const city = loc.city;
-    const country = loc.country;
     li.textContent = `${city}`;
     container.appendChild(li);
   });

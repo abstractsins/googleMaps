@@ -47,11 +47,11 @@ async function processLocationClick(event) {
   closeExistingMap();
 
   //* place new map in a <tr>, and set active state on clicked link
-  placeMap(event);
+  const mapElement = placeMap(event.target);
 
   const lat = clickedLink.getAttribute("lat");
   const lng = clickedLink.getAttribute("lng");
-  await showMap(lat, lng);
+  await showMap(lat, lng, mapElement);
 
   //* Style clicked link as active
   clickedLink.classList.add("active");
@@ -101,35 +101,44 @@ function closeExistingMap() {
   }
 }
 
-async function showMap(lat, lng) {
+async function showMap(lat, lng, mapElementOverride) {
   console.log(`Showing map centered at: ${lat}, ${lng}`);
-  const mapElement = document.querySelector("gmp-map");
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
   if (mapElement) {
     mapElement.setAttribute("center", `${lat},${lng}`);
     mapElement.setAttribute("zoom", "17");
-    await placeMarker(lat, lng);
+    await placeMarker(lat, lng, mapElement);
   }
 }
 
-function placeMap(event) {
-  const target = event.target;
+function placeMap(target) {
+  const mapString = `<div class="map-wrapper"><div class="map-container"><gmp-map zoom="17" map-id="DEMO_MAP_ID"></gmp-map></div></div>`;
   const tr = target.closest("tr");
-  const trMap = document.createElement("tr");
-  const tdMap = document.createElement("td");
+  if (tr) {
+    const trMap = document.createElement("tr");
+    const tdMap = document.createElement("td");
 
-  trMap.classList.add("map-row");
-  trMap.classList.add("open");
-  tdMap.setAttribute("colspan", "6");
-  tdMap.classList.add("map-cell");
+    trMap.classList.add("map-row");
+    trMap.classList.add("open");
+    tdMap.setAttribute("colspan", "6");
+    tdMap.classList.add("map-cell");
 
-  trMap.appendChild(tdMap);
-  tdMap.innerHTML = `<div class="map-wrapper"><div class="map-container"><gmp-map zoom="17" map-id="DEMO_MAP_ID"></gmp-map></div></div>`;
-  tr.after(trMap);
+    trMap.appendChild(tdMap);
+    tdMap.innerHTML = mapString;
+    tr.after(trMap);
+    return tdMap.querySelector("gmp-map");
+  }
+
+  const mapDiv = document.createElement("div");
+  mapDiv.classList.add("map-interface");
+  mapDiv.innerHTML = mapString;
+  target.nextElementSibling.append(mapDiv);
+  return mapDiv.querySelector("gmp-map");
 }
 
-async function placeMarker(lat, lng) {
+async function placeMarker(lat, lng, mapElementOverride) {
   await ensureMapsReady();
-  const mapElement = document.querySelector("gmp-map");
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
 
   if (mapElement) {
     const map = await getMapInstance(mapElement);
@@ -152,13 +161,46 @@ async function placeMarker(lat, lng) {
     new AdvancedMarkerElement({
       map,
       position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-      content: text,
       content: img,
     });
   }
 }
 
+async function placeDefaultMarker(lat, lng, count, mapElementOverride) {
+  await ensureMapsReady();
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
+
+  if (mapElement) {
+    const map = await getMapInstance(mapElement);
+    if (!map) {
+      console.warn("Map instance is not ready yet.");
+      return;
+    }
+
+    const { Marker } = await getMarkerLibrary();
+
+    new Marker({
+      map,
+      position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+      label: String(count),
+    });
+  }
+}
+
+async function showWorldMap() {
+  const mapElement = document.querySelector("gmp-map");
+  mapElement.classList.add("global");
+  if (!mapElement) return;
+
+  // Center at (0,0) and zoomed out to show the globe
+  mapElement.setAttribute("center", "20,0");
+  mapElement.setAttribute("zoom", "2.2");
+}
+
 window.placeMarker = placeMarker;
+window.placeDefaultMarker = placeDefaultMarker;
 window.showMap = showMap;
 window.placeMap = placeMap;
 window.processLocationClick = processLocationClick;
+window.closeExistingMap = closeExistingMap;
+window.showWorldMap = showWorldMap;
