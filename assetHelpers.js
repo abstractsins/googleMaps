@@ -16,6 +16,9 @@ const randomLetter = () =>
 const randomInRange = (range) =>
   Math.floor(Math.random() * (range[1] - range[0] + 1)) + range[0];
 
+const removeDiacritics = (str) =>
+  str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
 export const randomSerial = () => {
   const firstThreeLetters = Array(3)
     .fill(null)
@@ -78,6 +81,28 @@ export const populateCityList = (container) => {
     const li = document.createElement("li");
     const city = loc.city;
     li.textContent = `${city}`;
+    li.id = removeDiacritics(city).toLowerCase().replace(/\s/g, "-");
+    li.classList.add("global-view-city-legend-item");
     container.appendChild(li);
+    const markers = document.getElementsByClassName("world-asset-marker");
+
+    li.addEventListener("mouseover", () => {
+      Array.from(markers).forEach((marker) => {
+        marker.id === `global-marker-${normalizeCityName(city)}`
+          ? marker.classList.add("highlight")
+          : marker.classList.add("lowlight");
+      });
+    });
+
+    li.addEventListener("mouseout", () => {
+      Array.from(markers).forEach((marker) => {
+        marker.id === `global-marker-${normalizeCityName(city)}`
+          ? marker.classList.remove("highlight")
+          : marker.classList.remove("lowlight");
+      });
+    });
   });
 };
+
+export const normalizeCityName = (name) =>
+  removeDiacritics(name).toLowerCase().replace(/\s/g, "-");

@@ -54,15 +54,14 @@ export const assetTypes = [
 
 export const globalLocations = [
   { city: "Berlin", country: "Germany", coords: [52.52, 13.405] },
-  { city: "Los Angeles", country: "USA", coords: [34.0522, -118.2437] },
-  { city: "Chicago", country: "USA", coords: [41.8781, -87.6298] },
-  { city: "Houston", country: "USA", coords: [29.7604, -95.3698] },
+  { city: "Oakland", country: "USA", coords: [37.8044, -122.2711] },
   { city: "Philadelphia", country: "USA", coords: [39.9526, -75.1652] },
-  { city: "Montreal", country: "Canada", coords: [45.5017, -73.5673] },
+  { city: "Vancouver", country: "Canada", coords: [49.2827, -123.1207] },
   { city: "Singapore", country: "Singapore", coords: [1.3521, 103.8198] },
   { city: "Sydney", country: "Australia", coords: [-33.8688, 151.2093] },
   { city: "Tokyo", country: "Japan", coords: [35.6762, 139.6503] },
-];
+  { city: "Brasília", country: "Brazil", coords: [-15.8267, -47.9218] },
+].sort((a, b) => a.city.localeCompare(b.city));
 
 export const cityLocations = [
   {

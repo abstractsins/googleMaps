@@ -1,3 +1,5 @@
+import { normalizeCityName } from "./assetHelpers.js";
+
 let markerLibraryPromise = null;
 
 async function ensureMapsReady() {
@@ -102,12 +104,11 @@ function closeExistingMap() {
 }
 
 async function showMap(lat, lng, mapElementOverride) {
-  console.log(`Showing map centered at: ${lat}, ${lng}`);
   const mapElement = mapElementOverride || document.querySelector("gmp-map");
   if (mapElement) {
     mapElement.setAttribute("center", `${lat},${lng}`);
     mapElement.setAttribute("zoom", "17");
-    await placeMarker(lat, lng, mapElement);
+    await placeCustomMarker(lat, lng, mapElement);
   }
 }
 
@@ -136,7 +137,7 @@ function placeMap(target) {
   return mapDiv.querySelector("gmp-map");
 }
 
-async function placeMarker(lat, lng, mapElementOverride) {
+async function placeCustomMarker(lat, lng, mapElementOverride) {
   await ensureMapsReady();
   const mapElement = mapElementOverride || document.querySelector("gmp-map");
 
@@ -158,33 +159,113 @@ async function placeMarker(lat, lng, mapElementOverride) {
     text.textContent = "Asset Location";
     text.classList.add("marker-text");
 
-    new AdvancedMarkerElement({
+    const marker = new AdvancedMarkerElement({
       map,
       position: { lat: parseFloat(lat), lng: parseFloat(lng) },
       content: img,
     });
+
+    // Maps JS click event on the AdvancedMarker
+    marker.addListener("gmp-click", () => {
+      console.log("AdvancedMarker click event fired");
+    });
+
+    marker.addListener("mouseover", () => {
+      console.log("Marker hovered (mouseover)!");
+    });
+
+    marker.addListener("mouseout", () => {
+      console.log("Mouse left marker!");
+    });
   }
+}
+
+async function placePinMarker(lat, lng, mapElementOverride) {
+  const pin = new PinElement({
+    scale: 1,
+    borderColor: "#ffffff",
+    glyphText: String(asset.count),
+    glyphColor: "#ffffff",
+  });
+
+  pin.classList.add("world-asset-pin");
 }
 
 async function placeDefaultMarker(lat, lng, count, mapElementOverride) {
   await ensureMapsReady();
   const mapElement = mapElementOverride || document.querySelector("gmp-map");
 
-  if (mapElement) {
-    const map = await getMapInstance(mapElement);
-    if (!map) {
-      console.warn("Map instance is not ready yet.");
-      return;
-    }
-
-    const { Marker } = await getMarkerLibrary();
-
-    new Marker({
-      map,
-      position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-      label: String(count),
-    });
+  if (!mapElement) return;
+  const map = await getMapInstance(mapElement);
+  if (!map) {
+    console.warn("Map instance is not ready yet.");
+    return;
   }
+
+  const { AdvancedMarkerElement } = await getMarkerLibrary();
+
+  new AdvancedMarkerElement({
+    map,
+    position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+    label: String(count),
+  });
+}
+
+async function placeWorldAssetMarkers(asset, mapElementOverride) {
+  await ensureMapsReady();
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
+
+  if (!mapElement) return;
+  const map = await getMapInstance(mapElement);
+  if (!map) {
+    console.warn("Map instance is not ready yet.");
+    return;
+  }
+
+  const { AdvancedMarkerElement, PinElement } = await getMarkerLibrary();
+
+  const countTag = document.createElement("div");
+  countTag.textContent = asset.count;
+  countTag.className = "world-asset-count";
+
+  const marker = new AdvancedMarkerElement({
+    map,
+    position: {
+      lat: parseFloat(asset.coords[0]),
+      lng: parseFloat(asset.coords[1]),
+    },
+    title: `${asset.location}: ${asset.count} assets`,
+  });
+
+  marker.append(countTag);
+
+  const attributes = {
+    class: "world-asset-marker",
+    id: `global-marker-${normalizeCityName(asset.location)}`,
+  };
+  Object.entries(attributes).forEach(([key, value]) => {
+    marker.element.setAttribute(key, value);
+  });
+
+  marker.element.addEventListener("mouseenter", () => {
+    const cityId = normalizeCityName(asset.location);
+    const cityLink = document.getElementById(cityId);
+    if (cityLink) {
+      cityLink.classList.add("highlight");
+      marker.element.classList.add("highlight");
+    }
+  });
+
+  marker.element.addEventListener("mouseleave", () => {
+    const cityId = normalizeCityName(asset.location);
+    const cityLink = document.getElementById(cityId);
+    if (cityLink) {
+      cityLink.classList.remove("highlight");
+      marker.element.classList.remove("highlight");
+    }
+  });
+
+  console.log(marker);
 }
 
 async function showWorldMap() {
@@ -197,10 +278,11 @@ async function showWorldMap() {
   mapElement.setAttribute("zoom", "2.2");
 }
 
-window.placeMarker = placeMarker;
+window.placeCustomMarker = placeCustomMarker;
 window.placeDefaultMarker = placeDefaultMarker;
 window.showMap = showMap;
 window.placeMap = placeMap;
 window.processLocationClick = processLocationClick;
 window.closeExistingMap = closeExistingMap;
 window.showWorldMap = showWorldMap;
+window.placeWorldAssetMarkers = placeWorldAssetMarkers;

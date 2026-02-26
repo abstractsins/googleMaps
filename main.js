@@ -301,8 +301,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Populate city list in nav
-  const citiesList = document.getElementById("cities-list");
-  populateCityList(citiesList);
+  const citiesList = document.getElementsByClassName("cities-list");
+  Array.from(citiesList).forEach(populateCityList);
 
   // Sort by Serial (column 0) in ascending order on initial load
   sortTable(0);
@@ -373,11 +373,9 @@ async function setGlobalMap() {
   if (window.showWorldMap) {
     await window.showWorldMap();
   }
-  globalAssetCounts.forEach(({ coords, count }) => {
-    if (window.placeDefaultMarker) {
-      window.placeDefaultMarker(coords[0], coords[1], count);
-    } else if (window.placeMarker) {
-      window.placeMarker(coords[0], coords[1]);
+  globalAssetCounts.forEach((asset) => {
+    if (window.placeWorldAssetMarkers) {
+      window.placeWorldAssetMarkers(asset);
     }
   });
 }
@@ -403,20 +401,43 @@ function navMenuTrackingInit() {
     const rect = navList.getBoundingClientRect();
 
     const viewportY = rect.top;
+    const sideNav = document.querySelector("nav.side-nav");
 
-    if (viewportY <= 0) {
-      console.log("showing side nav");
-      setSideNavVisible(true);
+    if (viewportY <= -(rect.height + 200)) {
+      if (
+        !sideNav.classList.contains("visible") &&
+        !sideNav.classList.contains("tucked")
+      ) {
+        toggleSideNavVisible(true);
+      }
     } else {
-      console.log("hiding side nav");
-      setSideNavVisible(false);
+      toggleSideNavTucked(false);
+      toggleSideNavVisible(false);
     }
   };
 
-  const setSideNavVisible = (visible) => {
+  const toggleSideNavVisible = (visible) => {
     const sideNav = document.querySelector("nav.side-nav");
     if (!sideNav) return;
     sideNav.classList.toggle("visible", visible);
+  };
+
+  const toggleSideNavTucked = (tucked) => {
+    const sideNav = document.querySelector("nav.side-nav");
+    if (!sideNav) return;
+    const closeSideNavButton = document.getElementById("close-side-nav");
+    if (sideNav.classList.contains("visible")) {
+      sideNav.classList.toggle("tucked", tucked);
+      if (sideNav.classList.contains("tucked")) {
+        setTimeout(() => {
+          closeSideNavButton.innerHTML = `<i class="fa-solid fa-angles-right"></i>`;
+          closeSideNavButton.classList.add("tucked");
+        }, 350); // Allow CSS transition to complete before updating icon
+      } else {
+        closeSideNavButton.innerHTML = `<i class="fa-solid fa-angles-left"></i>`;
+        closeSideNavButton.classList.remove("tucked");
+      }
+    }
   };
 
   const populateSideNav = () => {
@@ -426,19 +447,19 @@ function navMenuTrackingInit() {
     mainNavItems.forEach((item, index) => {
       const clone = item.cloneNode(true);
       clone.dataset.sectionIndex = index;
-      sideNavList.appendChild(clone);
+      sideNavList.lastElementChild.before(clone);
     });
   };
 
   const closeSideNavButton = document.getElementById("close-side-nav");
   if (closeSideNavButton) {
     closeSideNavButton.addEventListener("click", () => {
-      setSideNavVisible(false);
+      toggleSideNavTucked();
     });
     closeSideNavButton.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        setSideNavVisible(false);
+        toggleSideNavTucked();
       }
     });
   }
