@@ -4,9 +4,11 @@ import {
   randomLocation,
   randomStatus,
   randomLastSeen,
-  populateCityList,
+  populateGlobalCityList,
+  populateFacilityCityList,
+  getCityLocationsList,
 } from "./assetHelpers.js";
-import { globalAssetCounts } from "./assetData.js";
+import { globalAssetCounts, globalLocations } from "./assetData.js";
 import { numOfAssetsToCreate } from "./constants.js";
 
 //* -------------------- TABLE BUILDER -------------------- */
@@ -302,13 +304,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Populate city list in nav
   const citiesList = document.getElementsByClassName("cities-list");
-  Array.from(citiesList).forEach(populateCityList);
+  Array.from(citiesList).forEach(populateGlobalCityList);
 
   // Sort by Serial (column 0) in ascending order on initial load
   sortTable(0);
 
   defaultToGlobalView();
   navMenuTrackingInit();
+
+  addSpecificEventListeners();
 
   // Add handlers to side nav items to mimic main nav behavior
   const sideNavList = document.getElementById("side-nav-list");
@@ -344,6 +348,12 @@ async function defaultMapSetup() {
   const mapElement = document.querySelector("gmp-map");
   if (mapElement) {
     mapElement.setAttribute("center", await getUserLocation());
+  }
+}
+
+async function defaultFacilityMapSetup() {
+  if (window.showFacilityMap) {
+    await window.showFacilityMap();
   }
 }
 
@@ -470,4 +480,26 @@ function navMenuTrackingInit() {
   // Track as the user scrolls / resizes
   window.addEventListener("scroll", updateNavPosition);
   window.addEventListener("resize", updateNavPosition);
+}
+
+function addSpecificEventListeners() {
+  // Add any specific event listeners that need to be set up after DOM content is loaded
+  facilityTableHeaderSetup();
+}
+
+async function facilityTableHeaderSetup() {
+  const byFacilityTableHeader = document.querySelector(
+    "#by-facility-table .table-header",
+  );
+  byFacilityTableHeader.addEventListener("click", (e) => {
+    defaultFacilityMapSetup();
+    placeMap(byFacilityTableHeader);
+  });
+  byFacilityTableHeader.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      defaultFacilityMapSetup();
+      placeMap(byFacilityTableHeader); 
+    }
+  });
 }

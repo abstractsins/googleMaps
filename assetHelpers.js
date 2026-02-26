@@ -19,6 +19,24 @@ const randomInRange = (range) =>
 const removeDiacritics = (str) =>
   str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+const collectLocations = (value) => {
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectLocations(item));
+  }
+
+  if (value && typeof value === "object") {
+    if (Array.isArray(value.coords)) {
+      return [value];
+    }
+
+    return Object.values(value).flatMap((item) => collectLocations(item));
+  }
+
+  return [];
+};
+
+export const getCityLocationsList = () => collectLocations(cityLocations);
+
 export const randomSerial = () => {
   const firstThreeLetters = Array(3)
     .fill(null)
@@ -41,8 +59,14 @@ export const randomAssetTypeAndDesc = () => {
 };
 
 export const randomLocation = () => {
+  const allLocations = getCityLocationsList();
+
+  if (!allLocations.length) {
+    return { short: "Unknown", coords: [0, 0] };
+  }
+
   const locationFull =
-    cityLocations[Math.floor(Math.random() * cityLocations.length)];
+    allLocations[Math.floor(Math.random() * allLocations.length)];
   const locationShort = `${locationFull.neighborhood}, ${locationFull.city}`;
   const locationCoords = locationFull.coords;
   return { short: locationShort, coords: locationCoords };
@@ -76,19 +100,26 @@ export const randomLastSeen = () => {
   return `${dateStr} ${timeStr}`;
 };
 
-export const populateCityList = (container) => {
+const makeCityLegendItem = (loc, className) => {
+  const li = document.createElement("li");
+  const city = loc.city;
+  li.textContent = `${city}`;
+  li.id = removeDiacritics(city).toLowerCase().replace(/\s/g, "-");
+  if (className) {
+    li.classList.add(className);
+  }
+  return li;
+};
+
+export const populateGlobalCityList = (container) => {
   globalLocations.forEach((loc) => {
-    const li = document.createElement("li");
-    const city = loc.city;
-    li.textContent = `${city}`;
-    li.id = removeDiacritics(city).toLowerCase().replace(/\s/g, "-");
-    li.classList.add("global-view-city-legend-item");
+    const li = makeCityLegendItem(loc, "global-view-city-legend-item");
     container.appendChild(li);
     const markers = document.getElementsByClassName("world-asset-marker");
 
     li.addEventListener("mouseover", () => {
       Array.from(markers).forEach((marker) => {
-        marker.id === `global-marker-${normalizeCityName(city)}`
+        marker.id === `global-marker-${normalizeCityName(loc.city)}`
           ? marker.classList.add("highlight")
           : marker.classList.add("lowlight");
       });
@@ -96,7 +127,31 @@ export const populateCityList = (container) => {
 
     li.addEventListener("mouseout", () => {
       Array.from(markers).forEach((marker) => {
-        marker.id === `global-marker-${normalizeCityName(city)}`
+        marker.id === `global-marker-${normalizeCityName(loc.city)}`
+          ? marker.classList.remove("highlight")
+          : marker.classList.remove("lowlight");
+      });
+    });
+  });
+};
+
+export const populateFacilityCityList = (container) => {
+  globalLocations.forEach((loc) => {
+    const li = makeCityLegendItem(loc, "facility-view-city-legend-item");
+    container.appendChild(li);
+    const markers = document.getElementsByClassName("facility-asset-marker");
+
+    li.addEventListener("mouseover", () => {
+      Array.from(markers).forEach((marker) => {
+        marker.id === `facility-marker-${normalizeCityName(loc.city)}`
+          ? marker.classList.add("highlight")
+          : marker.classList.add("lowlight");
+      });
+    });
+
+    li.addEventListener("mouseout", () => {
+      Array.from(markers).forEach((marker) => {
+        marker.id === `facility-marker-${normalizeCityName(loc.city)}`
           ? marker.classList.remove("highlight")
           : marker.classList.remove("lowlight");
       });

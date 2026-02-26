@@ -1,4 +1,6 @@
+import { globalLocations } from "./assetData.js";
 import { normalizeCityName } from "./assetHelpers.js";
+import { worldCenter } from "./constants.js";
 
 let markerLibraryPromise = null;
 
@@ -274,8 +276,22 @@ async function showWorldMap() {
   if (!mapElement) return;
 
   // Center at (0,0) and zoomed out to show the globe
-  mapElement.setAttribute("center", "20,0");
+  mapElement.setAttribute("center", worldCenter);
   mapElement.setAttribute("zoom", "2.2");
+}
+
+async function showFacilityMap() {
+  const mapElement = document.querySelector("gmp-map");
+  mapElement.classList.add("facilities");
+
+  if (!mapElement) return;
+
+  const defaultFacilityLocation = globalLocations[0];
+
+  if (defaultFacilityLocation?.coords) {
+    mapElement.setAttribute("center", defaultFacilityLocation.coords.join(","));
+    mapElement.setAttribute("zoom", "4");
+  }
 }
 
 window.placeCustomMarker = placeCustomMarker;
@@ -286,3 +302,4 @@ window.processLocationClick = processLocationClick;
 window.closeExistingMap = closeExistingMap;
 window.showWorldMap = showWorldMap;
 window.placeWorldAssetMarkers = placeWorldAssetMarkers;
+window.showFacilityMap = showFacilityMap;
