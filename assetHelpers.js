@@ -112,8 +112,15 @@ const makeCityLegendItem = (loc, className) => {
 };
 
 export const populateGlobalCityList = (container) => {
+  console.log(container);
+
   globalLocations.forEach((loc) => {
-    const li = makeCityLegendItem(loc, "global-view-city-legend-item");
+    let className;
+    if (container.parentElement.classList.contains("global-map-legend")) {
+      className = "global-view-city-legend-item";
+    }
+
+    const li = makeCityLegendItem(loc, className);
     container.appendChild(li);
     const markers = document.getElementsByClassName("world-asset-marker");
 
@@ -137,7 +144,12 @@ export const populateGlobalCityList = (container) => {
 
 export const populateFacilityCityList = (container) => {
   globalLocations.forEach((loc) => {
-    const li = makeCityLegendItem(loc, "facility-view-city-legend-item");
+    let className;
+    if (container.parentElement.classList.contains("facility-map-legend")) {
+      className = "facility-view-city-legend-item";
+    }
+
+    const li = makeCityLegendItem(loc, className);
     container.appendChild(li);
     const markers = document.getElementsByClassName("facility-asset-marker");
 

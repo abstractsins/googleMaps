@@ -1,8 +1,58 @@
-import { globalLocations } from "./assetData.js";
+import {
+  globalLocations,
+  globalAssetCounts,
+  cityLocations,
+} from "./assetData.js";
 import { normalizeCityName } from "./assetHelpers.js";
 import { worldCenter } from "./constants.js";
 
 let markerLibraryPromise = null;
+
+async function getUserLocation() {
+  if (navigator.geolocation) {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          console.log("User location obtained:", position.coords);
+          const { latitude, longitude } = position.coords;
+          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          resolve(`${latitude},${longitude}`);
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
+          resolve("39.8283,-98.5795"); // Geographic center of the contiguous US
+        },
+      );
+    });
+  } else {
+    console.error("Geolocation is not supported by this browser.");
+    return "39.8283,-98.5795"; // Geographic center of the contiguous US
+  }
+}
+
+async function defaultMapSetup() {
+  const mapElement = document.querySelector("gmp-map");
+  if (mapElement) {
+    mapElement.setAttribute("center", await getUserLocation());
+  }
+}
+
+async function setGlobalMap() {
+  if (window.showWorldMap) {
+    await window.showWorldMap();
+    globalAssetCounts.forEach((asset) => {
+      if (window.placeWorldAssetMarkers) {
+        window.placeWorldAssetMarkers(asset);
+      }
+    });
+  }
+}
+
+function defaultCityMapSetup() {
+  if (window.showCityMap) {
+    window.showCityMap();
+  }
+}
 
 async function ensureMapsReady() {
   if (!window.google?.maps?.importLibrary) {
@@ -48,7 +98,7 @@ async function processLocationClick(event) {
   }
 
   //* close any existing map and remove active state from any other link
-  closeExistingMap();
+  closeExistingMapInAssetTable();
 
   //* place new map in a <tr>, and set active state on clicked link
   const mapElement = placeMap(event.target);
@@ -76,18 +126,25 @@ function createCloseButton() {
   x.setAttribute("role", "button");
   x.setAttribute("aria-label", "Close map");
   x.addEventListener("click", () => {
-    closeExistingMap();
+    closeExistingMapInAssetTable();
   });
   x.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      closeExistingMap();
+      closeExistingMapInAssetTable();
     }
   });
   return x;
 }
 
-function closeExistingMap() {
+function closeOtherMaps() {
+  const openMaps = document.getElementsByTagName("gmp-map");
+  Array.from(openMaps).forEach((map) => {
+    map.remove();
+  });
+}
+
+function closeExistingMapInAssetTable() {
   const existingMapRow = document.querySelector(".map-row.open");
   const activeLink = document.querySelector(".map-link.active");
   if (activeLink) {
@@ -266,22 +323,23 @@ async function placeWorldAssetMarkers(asset, mapElementOverride) {
       marker.element.classList.remove("highlight");
     }
   });
-
-  console.log(marker);
 }
 
 async function showWorldMap() {
   const mapElement = document.querySelector("gmp-map");
-  mapElement.classList.add("global");
   if (!mapElement) return;
+
+  mapElement.classList.add("global");
 
   // Center at (0,0) and zoomed out to show the globe
   mapElement.setAttribute("center", worldCenter);
   mapElement.setAttribute("zoom", "2.2");
 }
 
-async function showFacilityMap() {
+async function showCityMap() {
   const mapElement = document.querySelector("gmp-map");
+  if (!mapElement) return;
+
   mapElement.classList.add("facilities");
 
   if (!mapElement) return;
@@ -290,16 +348,74 @@ async function showFacilityMap() {
 
   if (defaultFacilityLocation?.coords) {
     mapElement.setAttribute("center", defaultFacilityLocation.coords.join(","));
-    mapElement.setAttribute("zoom", "4");
+    mapElement.setAttribute("zoom", "9");
+  }
+}
+
+async function populateCityMap(city) {
+  const mapElement = document.querySelector("gmp-map");
+  if (!mapElement) return;
+
+  let location;
+
+  if (city === "default") {
+    location = globalLocations[0];
+  } else {
+    location = globalLocations.find(
+      (loc) => normalizeCityName(loc.city) === normalizeCityName(city),
+    );
+  }
+
+  console.log(location);
+
+  if (!location) {
+    console.warn("Facility location not found for:", city);
+    return;
+  }
+
+  const cityData = cityLocations.find((city) => {
+    return (
+      normalizeCityName(Object.keys(city)[0]) ===
+      normalizeCityName(location.city)
+    );
+  });
+
+  if (!cityData) return;
+
+  const locList = cityData[Object.keys(cityData)[0]];
+
+  if (locList.length > 0) {
+    const bounds = new google.maps.LatLngBounds();
+    locList.forEach((loc) => {
+      //! add label city name
+      placeDefaultMarker(loc.coords[0], loc.coords[1], mapElement);
+      bounds.extend(new google.maps.LatLng(loc.coords[0], loc.coords[1]));
+    });
+    mapElement.innerMap.fitBounds(bounds);
+  } else {
+    mapElement.setAttribute("center", location.coords.join(","));
+    mapElement.setAttribute("zoom", "12");
   }
 }
 
 window.placeCustomMarker = placeCustomMarker;
 window.placeDefaultMarker = placeDefaultMarker;
+
 window.showMap = showMap;
 window.placeMap = placeMap;
+
 window.processLocationClick = processLocationClick;
-window.closeExistingMap = closeExistingMap;
+window.closeExistingMapInAssetTable = closeExistingMapInAssetTable;
+
 window.showWorldMap = showWorldMap;
 window.placeWorldAssetMarkers = placeWorldAssetMarkers;
-window.showFacilityMap = showFacilityMap;
+
+window.setGlobalMap = setGlobalMap;
+window.defaultMapSetup = defaultMapSetup;
+
+window.showCityMap = showCityMap;
+window.populateCityMap = populateCityMap;
+
+window.defaultCityMapSetup = defaultCityMapSetup;
+
+window.closeOtherMaps = closeOtherMaps;

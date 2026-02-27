@@ -26,9 +26,9 @@
     <!-- NAV -->
     <nav class="page-nav">
       <ul id="top-level">
-        <li tabindex="0" role="navigation">Global View</li>
-        <li tabindex="0" role="navigation">By Facility</li>
-        <li tabindex="0" role="navigation">All Assets</li>
+        <li tabindex="0" role="navigation" id="global-view">Global View</li>
+        <li tabindex="0" role="navigation" id="by-facility">By Facility</li>
+        <li tabindex="0" role="navigation" id="all-assets">All Assets</li>
       </ul>
     </nav>
 
@@ -80,7 +80,7 @@
         </div>
         <div class="table-content">
           <table>
-            <thead>
+            <thead class="sticky-header">
               <tr>
                 <th class="sortable" data-column="0" tabindex="0">
                   Serial <span class="sort-icon"></span>

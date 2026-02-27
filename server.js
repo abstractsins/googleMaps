@@ -41,7 +41,7 @@ app.get("/", (req, res) => {
   const indexPath = path.join(__dirname, "index.html");
   const html = fs.readFileSync(indexPath, "utf8");
   const liveReloadScript = isDev
-    ? "\n    <script src=\"http://localhost:35729/livereload.js?snipver=1\"></script>"
+    ? '\n    <script src="http://localhost:35729/livereload.js?snipver=1"></script>'
     : "";
   const output = html
     .replaceAll("__MAPS_API_KEY__", MAPS_API_KEY)
@@ -54,5 +54,11 @@ app.get("/", (req, res) => {
 app.use(express.static(__dirname, { index: false }));
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`
+    -=0-=0-=0-=0-=0-=0-=0-=0==============0=-0=-0=-0=-0=-0=-0=-0=-
+     |                                                          |
+     |         Server running on http://localhost:${PORT}          |
+     |                                                          |
+    -=0-=0-=0-=0-=0-=0-=0-=0==============0=-0=-0=-0=-0=-0=-0=-0=-
+    `);
 });
