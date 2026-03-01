@@ -114,7 +114,7 @@ div.marker-text {
   text-align: center;
 }
 
-.facility-view-city-legend-item,
+.city-view-city-legend-item,
 .global-view-city-legend-item {
   border: 3px solid transparent;
   border-radius: 5px;
@@ -126,14 +126,14 @@ div.marker-text {
   transition: all 333ms ease-in-out;
 }
 
-.facility-view-city-legend-item:hover,
-.facility-view-city-legend-item.highlight {
+.city-view-city-legend-item:hover,
+.city-view-city-legend-item.highlight {
   border: 3px solid var(--color-link);
   cursor: pointer;
   box-shadow: var(--box-shadow-default-2);
 }
 
-.facility-view-city-legend-item.highlight {
+.city-view-city-legend-item.highlight {
   background-color: var(--color-blue-5);
 }
 
@@ -145,7 +145,7 @@ div.marker-text {
   box-shadow: var(--box-shadow-default-2);
 }
 
-.facility-view-city-legend-item:active {
+.city-view-city-legend-item:active {
   color: gray;
 }
 
@@ -209,7 +209,7 @@ div.marker-text {
   display: none;
 }
 
-div.facility-map-legend ul.cities-list li:active {
+div.city-map-legend ul.cities-list li:active {
   filter: invert();
 }
 

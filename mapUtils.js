@@ -18,9 +18,7 @@ async function getUserLocation() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log("User location obtained:", position.coords);
           const { latitude, longitude } = position.coords;
-          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
           resolve(`${latitude},${longitude}`);
         },
         (error) => {
@@ -490,11 +488,11 @@ async function populateCityMap(city) {
 function highlightCityLink(city) {
   const defaultCityId = normalizeCityName(city);
   const defaultCityLink = document.querySelector(
-    `#${defaultCityId}.facility-view-city-legend-item`,
+    `#${defaultCityId}.city-view-city-legend-item`,
   );
   if (defaultCityLink) {
     document
-      .querySelectorAll(".facility-view-city-legend-item")
+      .querySelectorAll(".city-view-city-legend-item")
       .forEach((link) => {
         link.classList.remove("active", "highlight");
       });

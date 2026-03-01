@@ -80,49 +80,49 @@ function matchNavIds(item, compare) {
   }
 }
 
-function facilityTableHeaderSetup() {
-  const byFacilityTableHeader = document.querySelector(
-    "#by-facility-table .table-header",
+function cityTableHeaderSetup() {
+  const byCityTableHeader = document.querySelector(
+    "#by-city-table .table-header",
   );
-  const byFacilityNavOption = document.querySelector(
-    "ul#top-level li#by-facility",
+  const byCityNavOption = document.querySelector(
+    "ul#top-level li#by-city",
   );
-  const byFacilitySideNavOption = document.querySelector(
-    "nav.side-nav ul#side-nav-list li#by-facility",
+  const byCitySideNavOption = document.querySelector(
+    "nav.side-nav ul#side-nav-list li#by-city",
   );
 
-  const handleFacilityHeaderClick = () => {
+  const handleCityHeaderClick = () => {
     window.closeOtherMaps();
-    window.placeMap(byFacilityTableHeader);
+    window.placeMap(byCityTableHeader);
     window.populateCityMap("default");
     window.showCityMap();
   };
 
-  [byFacilityTableHeader, byFacilityNavOption, byFacilitySideNavOption].forEach(
+  [byCityTableHeader, byCityNavOption, byCitySideNavOption].forEach(
     (el) => {
-      el.addEventListener("click", handleFacilityHeaderClick);
+      el.addEventListener("click", handleCityHeaderClick);
       el.addEventListener("keydown", (event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          handleFacilityHeaderClick();
+          handleCityHeaderClick();
         }
       });
     },
   );
 
-  const facilityCitiesList = document.querySelectorAll(
-    "div.facility-map-legend ul.cities-list li",
+  const cityCitiesList = document.querySelectorAll(
+    "div.city-map-legend ul.cities-list li",
   );
-  if (!facilityCitiesList) return;
+  if (!cityCitiesList) return;
 
-  facilityCitiesList.forEach((li) => {
+  cityCitiesList.forEach((li) => {
     li.addEventListener("click", (event) => {
-      handleFacilityNavClick(event.currentTarget);
+      handleCityNavClick(event.currentTarget);
     });
     li.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
-        handleFacilityNavClick(event.currentTarget);
+        handleCityNavClick(event.currentTarget);
       }
     });
   });
@@ -144,8 +144,8 @@ function facilityTableHeaderSetup() {
     window.populateCityMap(cityName);
   }
 
-  function handleFacilityNavClick(li) {
-    styleNavOptions(li, facilityCitiesList);
+  function handleCityNavClick(li) {
+    styleNavOptions(li, cityCitiesList);
     updateMapForCity(li);
   }
 }
@@ -360,6 +360,6 @@ export function navMenuTrackingInit() {
 }
 
 export function addSpecificEventListeners() {
-  facilityTableHeaderSetup();
+  cityTableHeaderSetup();
   globalViewTableHeaderSetup();
 }

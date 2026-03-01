@@ -116,8 +116,8 @@ export const populateGlobalCityList = (container) => {
   let type;
   if (parentClasses.contains("global-map-legend")) {
     type = "global";
-  } else if (parentClasses.contains("facility-map-legend")) {
-    type = "facility";
+  } else if (parentClasses.contains("city-map-legend")) {
+    type = "city";
   }
 
   globalLocations.forEach((loc) => {
@@ -127,8 +127,8 @@ export const populateGlobalCityList = (container) => {
       className = "global-view-city-legend-item";
       idPrefix = "global-marker";
       classPrefix = "global";
-    } else if (type === "facility") {
-      className = "facility-view-city-legend-item";
+    } else if (type === "city") {
+      className = "city-view-city-legend-item";
       idPrefix = "facility-marker";
       classPrefix = "facility";
     }
@@ -159,8 +159,8 @@ export const populateGlobalCityList = (container) => {
 export const populateFacilityCityList = (container) => {
   globalLocations.forEach((loc) => {
     let className;
-    if (container.parentElement.classList.contains("facility-map-legend")) {
-      className = "facility-view-city-legend-item";
+    if (container.parentElement.classList.contains("city-map-legend")) {
+      className = "city-view-city-legend-item";
     }
 
     const li = makeCityLegendItem(loc, className);
