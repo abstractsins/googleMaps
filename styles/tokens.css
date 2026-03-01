@@ -1,0 +1,28 @@
+:root {
+  --color-black-semi-1: rgba(0, 0, 0, 0.1);
+  --color-black-semi-2: rgba(0, 0, 0, 0.6);
+
+  --color-blue-1: #1a73e8;
+  --color-blue-2: rgba(100, 148, 237, 0.438);
+  --color-blue-3: rgba(100, 148, 237, 0.85);
+  --color-blue-4: rgba(65, 105, 225, 0.85);
+  --color-blue-5: rgba(100, 148, 237, 0.25);
+
+  --color-green: #1a9e1a;
+  --color-green-semi: rgba(25, 139, 25, 0.0675);
+
+  --color-gray-1: rgba(17, 17, 17, 0.2);
+  --color-gray-2: rgb(91, 104, 117);
+
+  --color-white-semi: rgba(255, 255, 255, 0.75);
+
+  --color-subtitle: var(--color-gray-2);
+  --color-link: var(--color-blue-1);
+  --color-table-header: var(--color-blue-3);
+  --color-table-header-hover: var(--color-blue-4);
+  --color-table-header-active: var(--color-blue-4);
+  --color-nav-hover: var(--color-gray-1);
+
+  --box-shadow-default: 0 4px 8px var(--color-black-semi-1);
+  --box-shadow-default-2: 0 4px 8px var(--color-black-semi-2);
+}

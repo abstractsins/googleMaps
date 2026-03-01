@@ -360,9 +360,6 @@ export function navMenuTrackingInit() {
 }
 
 export function addSpecificEventListeners() {
-  console.log(
-    "Adding specific event listeners for facility and global view table headers",
-  );
   facilityTableHeaderSetup();
   globalViewTableHeaderSetup();
 }

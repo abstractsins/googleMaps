@@ -1,0 +1,232 @@
+gmp-map {
+  display: block;
+  height: 400px;
+  margin: 2vh 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--box-shadow-default-2);
+}
+
+gmp-map.facilities,
+gmp-map.global {
+  height: 550px;
+}
+
+.map-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+}
+
+.map-container .map-header {
+  display: flex;
+}
+
+span.map-link {
+  padding: 0 0.5vw;
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+span.map-link:focus-visible {
+  outline: 3px solid goldenrod;
+  border-radius: 5px;
+  outline-offset: 2px;
+}
+
+span.map-link.active:focus-visible {
+  outline: 3px solid var(--color-link);
+}
+
+span.map-link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+span.map-link.active,
+span.map-link:active {
+  color: goldenrod;
+}
+
+td.location-cell > i {
+  font-size: 16px;
+  color: firebrick;
+}
+
+.map-close-btn {
+  position: absolute;
+  left: -1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.map-close-btn:hover {
+  cursor: pointer;
+}
+
+.map-close-btn:active {
+  filter: invert();
+}
+
+.map-close-btn:focus-visible {
+  outline: 3px solid firebrick;
+  border-radius: 50%;
+  outline-offset: 2px;
+}
+
+td.location-cell {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+img.marker-icon {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+div.marker-text {
+  background-color: var(--color-white-semi);
+  border: 5px double firebrick;
+  border-radius: 50%;
+  padding: 2px 6px;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  height: 50px;
+  width: 50px;
+  box-shadow: 3px 3px 5px var(--color-black-semi-2);
+  font-size: 0.75rem;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.facility-view-city-legend-item,
+.global-view-city-legend-item {
+  border: 3px solid transparent;
+  border-radius: 5px;
+  padding: 0.25vh 0.75vw;
+  font-weight: 600;
+}
+
+.global-view-city-legend-item {
+  transition: all 333ms ease-in-out;
+}
+
+.facility-view-city-legend-item:hover,
+.facility-view-city-legend-item.highlight {
+  border: 3px solid var(--color-link);
+  cursor: pointer;
+  box-shadow: var(--box-shadow-default-2);
+}
+
+.facility-view-city-legend-item.highlight {
+  background-color: var(--color-blue-5);
+}
+
+.global-view-city-legend-item:hover,
+.global-view-city-legend-item.highlight {
+  background-color: var(--color-green-semi);
+  border: 3px solid var(--color-green);
+  cursor: pointer;
+  box-shadow: var(--box-shadow-default-2);
+}
+
+.facility-view-city-legend-item:active {
+  color: gray;
+}
+
+.global-asset-marker {
+  cursor: pointer;
+  z-index: 100;
+}
+
+.global-asset-marker .world-asset-count,
+.global-asset-marker .world-asset-pin {
+  transform: scale(1);
+  transform-origin: center bottom;
+  transition:
+    transform 150ms ease,
+    filter 150ms ease,
+    opacity 150ms ease;
+}
+
+.global-asset-marker.highlight .world-asset-count,
+.global-asset-marker.highlight .world-asset-pin {
+  transform: scale(1.4);
+  filter: none;
+  opacity: 1;
+}
+
+.global-asset-marker.highlight {
+  z-index: 500;
+}
+
+.global-asset-marker.lowlight .world-asset-count,
+.global-asset-marker.lowlight .world-asset-pin {
+  transform: scale(0.85);
+  filter: grayscale(60%);
+  opacity: 0.6;
+}
+
+.world-asset-count {
+  background-color: #4285f4;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  padding: 7px 8px;
+  position: relative;
+  transform: translateY(-8px);
+}
+
+.world-asset-count::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, 0);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #4285f4;
+}
+
+.global-asset-marker.highlight .world-asset-count::after {
+  display: none;
+}
+
+div.facility-map-legend ul.cities-list li:active {
+  filter: invert();
+}
+
+/* Pin styling */
+gm-pin {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+gm-pin-background {
+  fill: orange;
+}
+
+gm-pin-inner-circle {
+  fill: #ffffff; /* center dot color */
+}
+
+gm-pin-border {
+  stroke: #000000; /* outline color */
+  stroke-width: 1;
+}

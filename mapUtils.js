@@ -11,6 +11,7 @@ import { normalizeCityName } from "./assetHelpers.js";
 import { worldCenter } from "./constants.js";
 
 let markerLibraryPromise = null;
+let globalResizeTimer = null;
 
 async function getUserLocation() {
   if (navigator.geolocation) {
@@ -44,13 +45,85 @@ async function defaultMapSetup() {
 async function setGlobalMap() {
   if (window.showWorldMap) {
     await window.showWorldMap();
-    globalAssetCounts.forEach((asset) => {
-      if (window.placeWorldAssetMarkers) {
-        window.placeWorldAssetMarkers(asset);
-      }
-    });
+
+    const mapElement = document.querySelector("gmp-map");
+    if (!mapElement) return;
+
+    if (window.placeWorldAssetMarkers) {
+      await Promise.all(
+        globalAssetCounts.map((asset) =>
+          window.placeWorldAssetMarkers(asset, mapElement),
+        ),
+      );
+    }
+
+    await fitGlobalMarkersToViewport(mapElement);
   }
 }
+
+function getMapViewportPadding(mapElement) {
+  const mapRect = mapElement.getBoundingClientRect();
+  const width = mapRect.width || window.innerWidth;
+  const height = mapRect.height || window.innerHeight;
+  const padding = Math.max(6, Math.round(Math.min(width, height) * 0.1));
+  // const padding = 0;
+
+  return {
+    top: padding,
+    right: padding,
+    bottom: padding,
+    left: padding,
+  };
+}
+
+async function fitGlobalMarkersToViewport(mapElementOverride) {
+  await ensureMapsReady();
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
+  if (!mapElement) return;
+
+  const map = await getMapInstance(mapElement);
+  if (!map) {
+    console.warn("Map instance is not ready yet.");
+    return;
+  }
+
+  const bounds = new google.maps.LatLngBounds();
+  globalAssetCounts.forEach((asset) => {
+    const lat = parseFloat(asset?.coords?.[0]);
+    const lng = parseFloat(asset?.coords?.[1]);
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      bounds.extend({ lat, lng });
+    }
+  });
+
+  if (bounds.isEmpty()) {
+    return;
+  }
+
+  map.fitBounds(bounds, getMapViewportPadding(mapElement));
+}
+
+function isGlobalMapActive() {
+  const mapElement = document.querySelector("gmp-map");
+  if (!mapElement) return false;
+  return mapElement.classList.contains("global");
+}
+
+function handleGlobalMapResize() {
+  if (!isGlobalMapActive()) return;
+
+  if (globalResizeTimer) {
+    clearTimeout(globalResizeTimer);
+  }
+
+  globalResizeTimer = setTimeout(() => {
+    fitGlobalMarkersToViewport().catch((error) => {
+      console.warn("Unable to fit global markers after resize:", error);
+    });
+  }, 100);
+}
+
+window.addEventListener("resize", handleGlobalMapResize);
 
 function defaultCityMapSetup() {
   if (window.showCityMap) {
@@ -374,6 +447,9 @@ async function populateCityMap(city) {
   let location;
   if (city === "default") {
     location = globalLocations[0];
+
+    // highlight the default city link and clear highlights from any other links
+    highlightCityLink(location.city);
   } else {
     location = globalLocations.find(
       (loc) => normalizeCityName(loc.city) === normalizeCityName(city),
@@ -384,8 +460,6 @@ async function populateCityMap(city) {
     (city) => normalizeCityName(city) === normalizeCityName(location.city),
   );
 
-  console.log(cityData);
-
   if (!cityData) return;
 
   const locList = cityLocations[cityData];
@@ -393,7 +467,6 @@ async function populateCityMap(city) {
   if (locList.length > 0) {
     const bounds = new google.maps.LatLngBounds();
     locList.forEach((loc) => {
-      console.log(loc);
       placeDefaultMarker(
         loc.coords[0],
         loc.coords[1],
@@ -411,6 +484,22 @@ async function populateCityMap(city) {
   } else {
     mapElement.setAttribute("center", location.coords.join(","));
     mapElement.setAttribute("zoom", "10");
+  }
+}
+
+function highlightCityLink(city) {
+  const defaultCityId = normalizeCityName(city);
+  const defaultCityLink = document.querySelector(
+    `#${defaultCityId}.facility-view-city-legend-item`,
+  );
+  if (defaultCityLink) {
+    document
+      .querySelectorAll(".facility-view-city-legend-item")
+      .forEach((link) => {
+        link.classList.remove("active", "highlight");
+      });
+    defaultCityLink.classList.add("active");
+    defaultCityLink.classList.add("highlight");
   }
 }
 
@@ -432,27 +521,33 @@ function removeMarkersFromMap() {
   screenState.currentMarkers = [];
 }
 
-window.placeCustomMarker = placeCustomMarker;
-window.placeDefaultMarker = placeDefaultMarker;
+// --------------------------- EXPORTS to WINDOW --------------------------- //
 
-window.showMap = showMap;
-window.placeMap = placeMap;
+const windowFunctions = {
+  placeCustomMarker,
+  placeDefaultMarker,
 
-window.processLocationClick = processLocationClick;
-window.closeExistingMapInAssetTable = closeExistingMapInAssetTable;
+  showMap,
+  placeMap,
 
-window.showWorldMap = showWorldMap;
-window.placeWorldAssetMarkers = placeWorldAssetMarkers;
+  processLocationClick,
+  closeExistingMapInAssetTable,
 
-window.setGlobalMap = setGlobalMap;
-window.defaultMapSetup = defaultMapSetup;
+  showWorldMap,
+  placeWorldAssetMarkers,
 
-window.showCityMap = showCityMap;
-window.populateCityMap = populateCityMap;
+  setGlobalMap,
+  defaultMapSetup,
 
-window.defaultCityMapSetup = defaultCityMapSetup;
+  showCityMap,
+  populateCityMap,
 
-window.closeOtherMaps = closeOtherMaps;
+  defaultCityMapSetup,
 
-window.zoomMapOut = zoomMapOut;
-window.removeMarkersFromMap = removeMarkersFromMap;
+  closeOtherMaps,
+
+  zoomMapOut,
+  removeMarkersFromMap,
+};
+
+Object.assign(window, windowFunctions);
