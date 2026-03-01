@@ -112,21 +112,35 @@ const makeCityLegendItem = (loc, className) => {
 };
 
 export const populateGlobalCityList = (container) => {
-  console.log(container);
+  const parentClasses = container.parentElement.classList;
+  let type;
+  if (parentClasses.contains("global-map-legend")) {
+    type = "global";
+  } else if (parentClasses.contains("facility-map-legend")) {
+    type = "facility";
+  }
 
   globalLocations.forEach((loc) => {
-    let className;
-    if (container.parentElement.classList.contains("global-map-legend")) {
+    let className, idPrefix, markers, classPrefix;
+
+    if (type === "global") {
       className = "global-view-city-legend-item";
+      idPrefix = "global-marker";
+      classPrefix = "global";
+    } else if (type === "facility") {
+      className = "facility-view-city-legend-item";
+      idPrefix = "facility-marker";
+      classPrefix = "facility";
     }
+
+    markers = document.getElementsByClassName(`${classPrefix}-asset-marker`);
 
     const li = makeCityLegendItem(loc, className);
     container.appendChild(li);
-    const markers = document.getElementsByClassName("world-asset-marker");
 
     li.addEventListener("mouseover", () => {
       Array.from(markers).forEach((marker) => {
-        marker.id === `global-marker-${normalizeCityName(loc.city)}`
+        marker.id === `${idPrefix}-${normalizeCityName(loc.city)}`
           ? marker.classList.add("highlight")
           : marker.classList.add("lowlight");
       });
@@ -134,7 +148,7 @@ export const populateGlobalCityList = (container) => {
 
     li.addEventListener("mouseout", () => {
       Array.from(markers).forEach((marker) => {
-        marker.id === `global-marker-${normalizeCityName(loc.city)}`
+        marker.id === `${idPrefix}-${normalizeCityName(loc.city)}`
           ? marker.classList.remove("highlight")
           : marker.classList.remove("lowlight");
       });

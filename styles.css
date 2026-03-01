@@ -6,6 +6,7 @@
   --color-blue-2: rgba(100, 148, 237, 0.438);
   --color-blue-3: rgba(100, 148, 237, 0.85);
   --color-blue-4: rgba(65, 105, 225, 0.85);
+  --color-blue-5: rgba(100, 148, 237, 0.25);
 
   --color-green: #1a9e1a;
   --color-green-semi: rgba(25, 139, 25, 0.0675);
@@ -417,12 +418,27 @@ div.marker-text {
   text-align: center;
 }
 
+.facility-view-city-legend-item,
 .global-view-city-legend-item {
   border: 3px solid transparent;
   border-radius: 5px;
   padding: 0.25vh 0.75vw;
-  transition: all 333ms ease-in-out;
   font-weight: 600;
+}
+
+.global-view-city-legend-item {
+  transition: all 333ms ease-in-out;
+}
+
+.facility-view-city-legend-item:hover,
+.facility-view-city-legend-item.highlight {
+  border: 3px solid var(--color-link);
+  cursor: pointer;
+  box-shadow: var(--box-shadow-default-2);
+}
+
+.facility-view-city-legend-item.highlight {
+  background-color: var(--color-blue-5);
 }
 
 .global-view-city-legend-item:hover,
@@ -433,13 +449,17 @@ div.marker-text {
   box-shadow: var(--box-shadow-default-2);
 }
 
-.world-asset-marker {
+.facility-view-city-legend-item:active {
+  color: gray;
+}
+
+.global-asset-marker {
   cursor: pointer;
   z-index: 100;
 }
 
-.world-asset-marker .world-asset-count,
-.world-asset-marker .world-asset-pin {
+.global-asset-marker .world-asset-count,
+.global-asset-marker .world-asset-pin {
   transform: scale(1);
   transform-origin: center bottom;
   transition:
@@ -448,18 +468,18 @@ div.marker-text {
     opacity 150ms ease;
 }
 
-.world-asset-marker.highlight .world-asset-count,
-.world-asset-marker.highlight .world-asset-pin {
+.global-asset-marker.highlight .world-asset-count,
+.global-asset-marker.highlight .world-asset-pin {
   transform: scale(1.4);
   filter: none;
   opacity: 1;
 }
-.world-asset-marker.highlight {
+.global-asset-marker.highlight {
   z-index: 500;
 }
 
-.world-asset-marker.lowlight .world-asset-count,
-.world-asset-marker.lowlight .world-asset-pin {
+.global-asset-marker.lowlight .world-asset-count,
+.global-asset-marker.lowlight .world-asset-pin {
   transform: scale(0.85);
   filter: grayscale(60%);
   opacity: 0.6;
@@ -488,7 +508,7 @@ div.marker-text {
   border-top: 8px solid #4285f4;
 }
 
-.world-asset-marker.highlight .world-asset-count::after {
+.global-asset-marker.highlight .world-asset-count::after {
   display: none;
 }
 
@@ -500,4 +520,26 @@ div.marker-text {
 
 div.facility-map-legend ul.cities-list li:active {
   filter: invert();
+}
+
+/* Pin styling */
+gm-pin {
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+gm-pin {
+  /* overall transform / scale / drop shadow, etc. */
+}
+
+gm-pin-background {
+  fill: orange;
+}
+
+gm-pin-inner-circle {
+  fill: #ffffff; /* center dot color */
+}
+
+gm-pin-border {
+  stroke: #000000; /* outline color */
+  stroke-width: 1;
 }

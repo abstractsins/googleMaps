@@ -1,3 +1,7 @@
+const screenState = {
+  currentMarkers: [],
+};
+
 import {
   globalLocations,
   globalAssetCounts,
@@ -250,7 +254,7 @@ async function placePinMarker(lat, lng, mapElementOverride) {
   pin.classList.add("world-asset-pin");
 }
 
-async function placeDefaultMarker(lat, lng, count, mapElementOverride) {
+async function placeDefaultMarker(lat, lng, label, mapElementOverride) {
   await ensureMapsReady();
   const mapElement = mapElementOverride || document.querySelector("gmp-map");
 
@@ -261,13 +265,24 @@ async function placeDefaultMarker(lat, lng, count, mapElementOverride) {
     return;
   }
 
-  const { AdvancedMarkerElement } = await getMarkerLibrary();
+  const { AdvancedMarkerElement, PinElement } = await getMarkerLibrary();
 
-  new AdvancedMarkerElement({
+  const pin = new PinElement({
+    scale: 1,
+    glyphText: String(label) || "",
+    // background: "#4285f4",
+    // borderColor: "#1a73e8",
+    // glyphColor: "#ffffff",
+    glyphColor: "black",
+  });
+
+  const marker = new AdvancedMarkerElement({
     map,
     position: { lat: parseFloat(lat), lng: parseFloat(lng) },
-    label: String(count),
+    content: pin,
+    title: String(label) || "",
   });
+  screenState.currentMarkers.push(marker);
 }
 
 async function placeWorldAssetMarkers(asset, mapElementOverride) {
@@ -299,7 +314,7 @@ async function placeWorldAssetMarkers(asset, mapElementOverride) {
   marker.append(countTag);
 
   const attributes = {
-    class: "world-asset-marker",
+    class: "global-asset-marker",
     id: `global-marker-${normalizeCityName(asset.location)}`,
   };
   Object.entries(attributes).forEach(([key, value]) => {
@@ -348,7 +363,7 @@ async function showCityMap() {
 
   if (defaultFacilityLocation?.coords) {
     mapElement.setAttribute("center", defaultFacilityLocation.coords.join(","));
-    mapElement.setAttribute("zoom", "9");
+    mapElement.setAttribute("zoom", "10");
   }
 }
 
@@ -357,7 +372,6 @@ async function populateCityMap(city) {
   if (!mapElement) return;
 
   let location;
-
   if (city === "default") {
     location = globalLocations[0];
   } else {
@@ -366,36 +380,56 @@ async function populateCityMap(city) {
     );
   }
 
-  console.log(location);
+  const cityData = Object.keys(cityLocations).find(
+    (city) => normalizeCityName(city) === normalizeCityName(location.city),
+  );
 
-  if (!location) {
-    console.warn("Facility location not found for:", city);
-    return;
-  }
-
-  const cityData = cityLocations.find((city) => {
-    return (
-      normalizeCityName(Object.keys(city)[0]) ===
-      normalizeCityName(location.city)
-    );
-  });
+  console.log(cityData);
 
   if (!cityData) return;
 
-  const locList = cityData[Object.keys(cityData)[0]];
+  const locList = cityLocations[cityData];
 
   if (locList.length > 0) {
     const bounds = new google.maps.LatLngBounds();
     locList.forEach((loc) => {
-      //! add label city name
-      placeDefaultMarker(loc.coords[0], loc.coords[1], mapElement);
+      console.log(loc);
+      placeDefaultMarker(
+        loc.coords[0],
+        loc.coords[1],
+        loc.neighborhood,
+        mapElement,
+      );
       bounds.extend(new google.maps.LatLng(loc.coords[0], loc.coords[1]));
     });
-    mapElement.innerMap.fitBounds(bounds);
+    mapElement.innerMap.fitBounds(bounds, {
+      top: 120,
+      right: 120,
+      bottom: 120,
+      left: 120,
+    });
   } else {
     mapElement.setAttribute("center", location.coords.join(","));
-    mapElement.setAttribute("zoom", "12");
+    mapElement.setAttribute("zoom", "10");
   }
+}
+
+function zoomMapOut() {
+  const mapElement = document.querySelector("gmp-map");
+  if (!mapElement) return;
+  mapElement.setAttribute("zoom", "10");
+}
+
+function removeMarkersFromMap() {
+  const mapElement = document.querySelector("gmp-map");
+  if (!mapElement || !mapElement.innerMap) return;
+  const map = mapElement.innerMap;
+  map.markers?.forEach((marker) => marker.setMap(null));
+  map.markers = [];
+
+  // advanced markers
+  screenState.currentMarkers.forEach((marker) => marker.setMap(null));
+  screenState.currentMarkers = [];
 }
 
 window.placeCustomMarker = placeCustomMarker;
@@ -419,3 +453,6 @@ window.populateCityMap = populateCityMap;
 window.defaultCityMapSetup = defaultCityMapSetup;
 
 window.closeOtherMaps = closeOtherMaps;
+
+window.zoomMapOut = zoomMapOut;
+window.removeMarkersFromMap = removeMarkersFromMap;

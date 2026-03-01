@@ -116,13 +116,38 @@ function facilityTableHeaderSetup() {
   if (!facilityCitiesList) return;
 
   facilityCitiesList.forEach((li) => {
-    li.addEventListener("click", () => {});
+    li.addEventListener("click", (event) => {
+      handleFacilityNavClick(event.currentTarget);
+    });
     li.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
+        handleFacilityNavClick(event.currentTarget);
       }
     });
   });
+
+  function styleNavOptions(li, list) {
+    list.forEach((item) => {
+      if (item === li) {
+        item.classList.add("active", "highlight");
+      } else {
+        item.classList.remove("active", "highlight");
+      }
+    });
+  }
+
+  function updateMapForCity(li) {
+    const cityName = li.id;
+    // window.zoomMapOut();
+    window.removeMarkersFromMap();
+    window.populateCityMap(cityName);
+  }
+
+  function handleFacilityNavClick(li) {
+    styleNavOptions(li, facilityCitiesList);
+    updateMapForCity(li);
+  }
 }
 
 function globalViewTableHeaderSetup() {

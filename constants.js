@@ -1,5 +1,5 @@
 //* Number of entities to create */
-export const numOfAssetsToCreate = 100;
+export const numOfAssetsToCreate = 300;
 
 //* Ranges and probabilities for random generation */
 export const serialNumberSectionsRange = [10000, 99999]; // 5 digit number
