@@ -3,7 +3,8 @@ let currentData = []; // Store current table data
 
 const parseTableData = () => {
   const tbody = document.getElementById("generated-rows");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
+  // Exclude map rows so sorting only applies to asset rows
+  const rows = Array.from(tbody.querySelectorAll("tr:not(.map-row)"));
 
   return rows.map((row) => {
     const cells = Array.from(row.querySelectorAll("td"));

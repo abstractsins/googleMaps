@@ -12,6 +12,18 @@ import { worldCenter } from "./constants.js";
 
 let markerLibraryPromise = null;
 let globalResizeTimer = null;
+let facilityInfoWindow = null;
+
+const statusColors = {
+  Active: "#34a853", // green
+  Inactive: "#666666", // grey
+  "Under Maintenance": "#fbbc05", // yellow
+  Decommissioned: "#b0bec5", // light grey
+  Lost: "#ff3300", // red
+  "In Repair": "#ff9100", // orange
+  New: "#1e88e5", // blue
+  Retired: "#9e5098", // purple
+};
 
 async function getUserLocation() {
   if (navigator.geolocation) {
@@ -213,6 +225,19 @@ function createCloseButton() {
 }
 
 function closeOtherMaps() {
+  // Remove map interfaces inserted under headers (By City, Global View, etc.)
+  const mapInterfaces = document.querySelectorAll(".map-interface");
+  mapInterfaces.forEach((wrapper) => {
+    wrapper.remove();
+  });
+
+  // Remove any open map rows inside the asset table
+  const mapRows = document.querySelectorAll(".map-row");
+  mapRows.forEach((row) => {
+    row.remove();
+  });
+
+  // Fallback: remove any stray gmp-map elements
   const openMaps = document.getElementsByTagName("gmp-map");
   Array.from(openMaps).forEach((map) => {
     map.remove();
@@ -247,7 +272,7 @@ async function showMap(lat, lng, mapElementOverride) {
 }
 
 function placeMap(target) {
-  const mapString = `<div class="map-wrapper"><div class="map-container"><gmp-map zoom="17" map-id="DEMO_MAP_ID"></gmp-map></div></div>`;
+  const mapString = `<div class="map-wrapper"><div class="map-container"><gmp-map zoom="17" map-id="DEMO_MAP_ID"></gmp-map><div class="status-legend" aria-label="Status legend"></div></div></div>`;
   const tr = target.closest("tr");
   if (tr) {
     const trMap = document.createElement("tr");
@@ -261,6 +286,7 @@ function placeMap(target) {
     trMap.appendChild(tdMap);
     tdMap.innerHTML = mapString;
     tr.after(trMap);
+    renderStatusLegend();
     return tdMap.querySelector("gmp-map");
   }
 
@@ -268,6 +294,7 @@ function placeMap(target) {
   mapDiv.classList.add("map-interface");
   mapDiv.innerHTML = mapString;
   target.nextElementSibling.append(mapDiv);
+  renderStatusLegend();
   return mapDiv.querySelector("gmp-map");
 }
 
@@ -353,6 +380,219 @@ async function placeDefaultMarker(lat, lng, label, mapElementOverride) {
     content: pin,
     title: String(label) || "",
   });
+  screenState.currentMarkers.push(marker);
+}
+
+function getLocationSpansForCoords(lat, lng) {
+  const latStr = String(parseFloat(lat));
+  const lngStr = String(parseFloat(lng));
+
+  const locationSpans = document.querySelectorAll(
+    `.map-link[lat="${latStr}"][lng="${lngStr}"]`,
+  );
+
+  return locationSpans;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function getAssetRecordsForCoords(lat, lng) {
+  const locationSpans = getLocationSpansForCoords(lat, lng);
+
+  return Array.from(locationSpans)
+    .map((span) => {
+      const row = span.closest("tr");
+      if (!row) return null;
+
+      const serial =
+        row.querySelector(".asset-serial")?.textContent?.trim() || "";
+      const type = row.querySelector(".asset-type")?.textContent?.trim() || "";
+      const description =
+        row.querySelector(".asset-description")?.textContent?.trim() || "";
+      const status =
+        row.querySelector(".asset-status")?.textContent?.trim() || "";
+      const lastSeen =
+        row.querySelector(".asset-last-seen")?.textContent?.trim() || "";
+
+      return {
+        serial,
+        type,
+        description,
+        status,
+        lastSeen,
+      };
+    })
+    .filter(Boolean);
+}
+
+function buildFacilityMarkerPopupContent(lat, lng, label) {
+  const records = getAssetRecordsForCoords(lat, lng);
+  const safeLabel = escapeHtml(label || "Location");
+
+  if (!records.length) {
+    return `<div class="facility-popup"><div class="facility-popup-title">${safeLabel} — at a glance</div><p class="facility-popup-empty">No assets found for this location.</p></div>`;
+  }
+
+  const rows = records
+    .map((record) => {
+      const statusColor = statusColors[record.status] || "#f0f0f0";
+      const backgroundColor = `${statusColor}33`;
+      return `<tr style="background-color: ${backgroundColor};"><td>${escapeHtml(record.serial)}</td><td>${escapeHtml(record.type)}</td><td>${escapeHtml(record.description)}</td><td>${escapeHtml(record.status)}</td><td>${escapeHtml(record.lastSeen)}</td></tr>`;
+    })
+    .join("");
+
+  return `<div class="facility-popup"><div class="facility-popup-title" style="margin-bottom: 0.5rem;"><span style="font-weight: bold; font-size: 1rem;">${safeLabel}</span> — at a glance (${records.length})</div><div class="facility-popup-table-wrap"><table class="facility-popup-table"><thead><tr><th>Serial</th><th>Type</th><th>Description</th><th>Status</th><th>Last Seen</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+function openFacilityMarkerPopup(marker, map, lat, lng, label) {
+  if (!facilityInfoWindow) {
+    facilityInfoWindow = new google.maps.InfoWindow();
+  }
+
+  facilityInfoWindow.setContent(
+    buildFacilityMarkerPopupContent(lat, lng, label),
+  );
+  facilityInfoWindow.open({
+    anchor: marker,
+    map,
+    shouldFocus: false,
+  });
+}
+
+function decideMarkerBackground(lat, lng) {
+  const locationSpans = getLocationSpansForCoords(lat, lng);
+
+  if (!locationSpans.length) {
+    return "#4285f4";
+  }
+
+  const statusCounts = {};
+
+  locationSpans.forEach((span) => {
+    const row = span.closest("tr");
+    if (!row) return;
+    const statusCell = row.querySelector(".asset-status");
+    if (!statusCell) return;
+    const status = statusCell.textContent.trim();
+    if (!status) return;
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+  });
+
+  const statusesForLocation = Object.keys(statusCounts);
+  if (!statusesForLocation.length) {
+    return "#4285f4";
+  }
+
+  let dominantStatus = statusesForLocation[0];
+  let maxCount = statusCounts[dominantStatus];
+
+  for (let i = 1; i < statusesForLocation.length; i++) {
+    const status = statusesForLocation[i];
+    const count = statusCounts[status];
+    if (count > maxCount || (count === maxCount && status < dominantStatus)) {
+      dominantStatus = status;
+      maxCount = count;
+    }
+  }
+  return statusColors[dominantStatus] || "#4285f4";
+}
+
+function decideMarkerScale(lat, lng) {
+  const locationSpans = getLocationSpansForCoords(lat, lng);
+  const assetCount = locationSpans.length;
+
+  if (!assetCount) {
+    return 1;
+  }
+
+  const minScale = 0.8;
+  const maxScale = 2.0;
+  const maxCountForScaling = 10;
+
+  const clampedCount = Math.min(assetCount, maxCountForScaling);
+  const scaleRange = maxScale - minScale;
+
+  return minScale + (clampedCount / maxCountForScaling) * scaleRange;
+}
+
+function renderStatusLegend() {
+  const legends = document.querySelectorAll(".map-container .status-legend");
+
+  legends.forEach((legend) => {
+    if (!legend || legend.dataset.initialized === "true") return;
+
+    legend.dataset.initialized = "true";
+    legend.innerHTML = "";
+
+    Object.entries(statusColors).forEach(([status, color]) => {
+      const item = document.createElement("div");
+      item.className = "status-legend-item";
+
+      const swatch = document.createElement("span");
+      swatch.className = "status-legend-swatch";
+      swatch.style.backgroundColor = color;
+
+      const label = document.createElement("span");
+      label.className = "status-legend-label";
+      label.textContent = status;
+
+      item.appendChild(swatch);
+      item.appendChild(label);
+      legend.appendChild(item);
+    });
+  });
+}
+
+function decideMarkerBorderColor() {
+  return "white";
+}
+
+function decideMarkerGlyphColor() {
+  return "black";
+}
+
+async function placeFacilityMarker(lat, lng, label, mapElementOverride) {
+  await ensureMapsReady();
+  const mapElement = mapElementOverride || document.querySelector("gmp-map");
+
+  if (!mapElement) return;
+  const map = await getMapInstance(mapElement);
+  if (!map) {
+    console.warn("Map instance is not ready yet.");
+    return;
+  }
+
+  const { AdvancedMarkerElement, PinElement } = await getMarkerLibrary();
+
+  const pin = new PinElement({
+    scale: decideMarkerScale(lat, lng),
+    glyphText: String(label) || "",
+    // background: "#4285f4",
+    // borderColor: "#1a73e8",
+    // glyphColor: "#ffffff",
+    background: decideMarkerBackground(lat, lng),
+    borderColor: decideMarkerBorderColor(),
+    glyphColor: decideMarkerGlyphColor(),
+  });
+
+  const marker = new AdvancedMarkerElement({
+    map,
+    position: { lat: parseFloat(lat), lng: parseFloat(lng) },
+    content: pin.element,
+    title: String(label) || "",
+  });
+
+  marker.addListener("gmp-click", () => {
+    openFacilityMarkerPopup(marker, map, lat, lng, label);
+  });
+
   screenState.currentMarkers.push(marker);
 }
 
@@ -465,7 +705,7 @@ async function populateCityMap(city) {
   if (locList.length > 0) {
     const bounds = new google.maps.LatLngBounds();
     locList.forEach((loc) => {
-      placeDefaultMarker(
+      placeFacilityMarker(
         loc.coords[0],
         loc.coords[1],
         loc.neighborhood,
@@ -491,11 +731,9 @@ function highlightCityLink(city) {
     `#${defaultCityId}.city-view-city-legend-item`,
   );
   if (defaultCityLink) {
-    document
-      .querySelectorAll(".city-view-city-legend-item")
-      .forEach((link) => {
-        link.classList.remove("active", "highlight");
-      });
+    document.querySelectorAll(".city-view-city-legend-item").forEach((link) => {
+      link.classList.remove("active", "highlight");
+    });
     defaultCityLink.classList.add("active");
     defaultCityLink.classList.add("highlight");
   }
@@ -517,13 +755,36 @@ function removeMarkersFromMap() {
   // advanced markers
   screenState.currentMarkers.forEach((marker) => marker.setMap(null));
   screenState.currentMarkers = [];
+
+  if (facilityInfoWindow) {
+    facilityInfoWindow.close();
+  }
 }
+//
+function populateFacilityMap() {}
+
+// async function showFacilityMap() {
+//   const mapElement = document.querySelector("gmp-map");
+//   if (!mapElement) return;
+
+//   mapElement.classList.add("facilities");
+
+//   if (!mapElement) return;
+
+//   const defaultFacilityLocation = globalLocations[0];
+
+//   if (defaultFacilityLocation?.coords) {
+//     mapElement.setAttribute("center", defaultFacilityLocation.coords.join(","));
+//     mapElement.setAttribute("zoom", "10");
+//   }
+// }
 
 // --------------------------- EXPORTS to WINDOW --------------------------- //
 
 const windowFunctions = {
   placeCustomMarker,
   placeDefaultMarker,
+  placeFacilityMarker,
 
   showMap,
   placeMap,
@@ -539,6 +800,9 @@ const windowFunctions = {
 
   showCityMap,
   populateCityMap,
+
+  // showFacilityMap,
+  // populateFacilityMap,
 
   defaultCityMapSetup,
 

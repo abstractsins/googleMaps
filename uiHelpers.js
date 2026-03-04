@@ -1,6 +1,6 @@
 import {
   populateGlobalCityList,
-  populateFacilityCityList,
+  // populateFacilityCityList,
 } from "./assetHelpers.js";
 
 const ui = {};
@@ -80,13 +80,42 @@ function matchNavIds(item, compare) {
   }
 }
 
+function facilityTableHeaderSetup() {
+  const facilityViewHeader = document.querySelector(
+    "div#by-facility-table > div.table-header",
+  );
+  const facilityViewNavOption = document.querySelector(
+    "ul#top-level li#by-facility",
+  );
+  const facilitySideNavOption = document.querySelector(
+    "nav.side-nav ul#side-nav-list li#by-facility",
+  );
+
+  const handleFacilityHeaderClick = () => {
+    window.closeOtherMaps();
+    window.placeMap(facilityViewHeader);
+    window.populateFacilityMap("default");
+    window.showFacilityMap();
+  };
+
+  [facilityViewHeader, facilityViewNavOption, facilitySideNavOption].forEach(
+    (el) => {
+      el.addEventListener("click", handleFacilityHeaderClick);
+      el.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleFacilityHeaderClick();
+        }
+      });
+    },
+  );
+}
+
 function cityTableHeaderSetup() {
   const byCityTableHeader = document.querySelector(
     "#by-city-table .table-header",
   );
-  const byCityNavOption = document.querySelector(
-    "ul#top-level li#by-city",
-  );
+  const byCityNavOption = document.querySelector("ul#top-level li#by-city");
   const byCitySideNavOption = document.querySelector(
     "nav.side-nav ul#side-nav-list li#by-city",
   );
@@ -98,17 +127,15 @@ function cityTableHeaderSetup() {
     window.showCityMap();
   };
 
-  [byCityTableHeader, byCityNavOption, byCitySideNavOption].forEach(
-    (el) => {
-      el.addEventListener("click", handleCityHeaderClick);
-      el.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          handleCityHeaderClick();
-        }
-      });
-    },
-  );
+  [byCityTableHeader, byCityNavOption, byCitySideNavOption].forEach((el) => {
+    el.addEventListener("click", handleCityHeaderClick);
+    el.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        handleCityHeaderClick();
+      }
+    });
+  });
 
   const cityCitiesList = document.querySelectorAll(
     "div.city-map-legend ul.cities-list li",
@@ -275,7 +302,6 @@ export function findInitiallyActiveSection() {
   }
 }
 
-//! need to differentiate between global and facility city lists to apply correct styles and map interactions - can check parent container class to determine which list it is and apply appropriate class to list items for styling, as well as hover interactions for map markers
 export function populateCityListNavs() {
   const citiesList = document.getElementsByClassName("cities-list");
   Array.from(citiesList).forEach(populateGlobalCityList);
@@ -360,6 +386,7 @@ export function navMenuTrackingInit() {
 }
 
 export function addSpecificEventListeners() {
+  // facilityTableHeaderSetup();
   cityTableHeaderSetup();
   globalViewTableHeaderSetup();
 }

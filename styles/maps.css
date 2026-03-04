@@ -30,6 +30,29 @@ gmp-map.global {
   display: flex;
 }
 
+.status-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  align-self: flex-start;
+  font-size: 0.8rem;
+}
+
+.status-legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 0.75rem;
+}
+
+.status-legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
 span.map-link {
   padding: 0 0.5vw;
   color: var(--color-link);
@@ -214,7 +237,7 @@ div.city-map-legend ul.cities-list li:active {
 }
 
 /* Pin styling */
-gm-pin {
+gm-pin text {
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
 }
 
@@ -222,11 +245,48 @@ gm-pin-background {
   fill: orange;
 }
 
-gm-pin-inner-circle {
-  fill: #ffffff; /* center dot color */
-}
 
 gm-pin-border {
   stroke: #000000; /* outline color */
   stroke-width: 1;
+}
+
+.facility-popup {
+  min-width: 420px;
+  max-width: 680px;
+}
+
+.facility-popup-title {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.facility-popup-empty {
+  margin: 0;
+}
+
+.facility-popup-table-wrap {
+  max-height: 240px;
+  overflow: auto;
+}
+
+.facility-popup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.facility-popup-table th,
+.facility-popup-table td {
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  vertical-align: top;
+}
+
+.facility-popup-table th {
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 1;
 }

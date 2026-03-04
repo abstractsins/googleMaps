@@ -8,7 +8,6 @@ import {
   populateCityListNavs,
   navMenuTrackingInit,
   addSpecificEventListeners,
-  defaultToGlobalView,
 } from "./uiHelpers.js";
 
 //* ------------------------------ DOMContentLoaded ------------------------------ */

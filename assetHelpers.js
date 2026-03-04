@@ -156,34 +156,35 @@ export const populateGlobalCityList = (container) => {
   });
 };
 
-export const populateFacilityCityList = (container) => {
-  globalLocations.forEach((loc) => {
-    let className;
-    if (container.parentElement.classList.contains("city-map-legend")) {
-      className = "city-view-city-legend-item";
-    }
+// export const populateFacilityCityList = (container) => {
+//   console.log("populateFacilityCityList called");
+//   globalLocations.forEach((loc) => {
+//     let className;
+//     if (container.parentElement.classList.contains("city-map-legend")) {
+//       className = "city-view-city-legend-item";
+//     }
 
-    const li = makeCityLegendItem(loc, className);
-    container.appendChild(li);
-    const markers = document.getElementsByClassName("facility-asset-marker");
+//     const li = makeCityLegendItem(loc, className);
+//     container.appendChild(li);
+//     const markers = document.getElementsByClassName("facility-asset-marker");
 
-    li.addEventListener("mouseover", () => {
-      Array.from(markers).forEach((marker) => {
-        marker.id === `facility-marker-${normalizeCityName(loc.city)}`
-          ? marker.classList.add("highlight")
-          : marker.classList.add("lowlight");
-      });
-    });
+//     li.addEventListener("mouseover", () => {
+//       Array.from(markers).forEach((marker) => {
+//         marker.id === `facility-marker-${normalizeCityName(loc.city)}`
+//           ? marker.classList.add("highlight")
+//           : marker.classList.add("lowlight");
+//       });
+//     });
 
-    li.addEventListener("mouseout", () => {
-      Array.from(markers).forEach((marker) => {
-        marker.id === `facility-marker-${normalizeCityName(loc.city)}`
-          ? marker.classList.remove("highlight")
-          : marker.classList.remove("lowlight");
-      });
-    });
-  });
-};
+//     li.addEventListener("mouseout", () => {
+//       Array.from(markers).forEach((marker) => {
+//         marker.id === `facility-marker-${normalizeCityName(loc.city)}`
+//           ? marker.classList.remove("highlight")
+//           : marker.classList.remove("lowlight");
+//       });
+//     });
+//   });
+// };
 
 export const normalizeCityName = (name) =>
   removeDiacritics(name).toLowerCase().replace(/\s/g, "-");
